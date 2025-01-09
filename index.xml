@@ -5,5 +5,16 @@
         <description>This is my cool site</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 09 Jan 2025 11:05:58 &#43;0800</lastBuildDate>
             <atom:link href="https://guluguluhhhh.github.io/index.xml" rel="self" type="application/rss+xml" />
-        </channel>
+        <item>
+    <title>First_post</title>
+    <link>https://guluguluhhhh.github.io/first_post/</link>
+    <pubDate>Thu, 09 Jan 2025 11:05:58 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>https://guluguluhhhh.github.io/first_post/</guid>
+    <description><![CDATA[<h1 id="my-first-post">my first post</h1>
+<h2 id="hello-world-">hello world {|}</h2>
+<p><del>这段文本带有除线.</del></p>
+<p>asd</p>]]></description>
+</item>
+</channel>
 </rss>
