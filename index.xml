@@ -11,7 +11,7 @@
     <pubDate>Mon, 13 Jan 2025 09:55:13 &#43;0800</pubDate>
     <author>huazi</author>
     <guid>https://guluguluhhhh.github.io/cmu15445-trie/</guid>
-    <description><![CDATA[<h3 id="trie">Trie</h3>
+    <description><![CDATA[<h2 id="trie">Trie</h2>
 <p>trie 实现的是键值存储，字符串键可以映射到任何类型值。键的值存储在改键的最后一个字符的终端节点。例如将（“ab”， 1） 和 （“ac”， “val”） 插入到 trie 中。
 </p>]]></description>
 </item>
