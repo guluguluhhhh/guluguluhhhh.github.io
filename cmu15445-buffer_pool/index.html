@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Cmu15445 Buffer_pool - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="https://guluguluhhhh.github.io/cmu15445-buffer_pool/">
+  <meta property="og:site_name" content="华子的博客">
+  <meta property="og:title" content="Cmu15445 Buffer_pool">
+  <meta property="og:description" content="Buffer_pool 这个project是要在存储管理器中实现一个buffer pool，即缓冲池。缓冲池其实就是一块大的内存区域主内存，负责与磁盘之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符page_id_t想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-01-13T16:49:33+08:00">
+    <meta property="article:modified_time" content="2025-01-13T16:49:33+08:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Cmu15445 Buffer_pool">
+  <meta name="twitter:description" content="Buffer_pool 这个project是要在存储管理器中实现一个buffer pool，即缓冲池。缓冲池其实就是一块大的内存区域主内存，负责与磁盘之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符page_id_t想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。">
+<meta name="application-name" content="华子的博客">
+<meta name="apple-mobile-web-app-title" content="华子的博客"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" /><link rel="prev" href="https://guluguluhhhh.github.io/cmu15445-trie/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Cmu15445 Buffer_pool",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/guluguluhhhh.github.io\/cmu15445-buffer_pool\/"
+        },"genre": "posts","wordcount":  3648 ,
+        "url": "https:\/\/guluguluhhhh.github.io\/cmu15445-buffer_pool\/","datePublished": "2025-01-13T16:49:33+08:00","dateModified": "2025-01-13T16:49:33+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "huazi"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="华子的博客">华子的博客</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+             
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="华子的博客">华子的博客</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a>
+ 
+        </div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Cmu15445 Buffer_pool</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-01-13">2025-01-13</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;3648 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;8 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#buffer_pool">Buffer_pool</a></li>
+    <li><a href="#lru-k-更换策略">LRU-K 更换策略</a>
+      <ul>
+        <li><a href="#evictframe_id_t-frame_id---bool"><strong><code>Evict(frame_id_t* frame_id) -&gt; bool</code></strong></a></li>
+        <li><a href="#recordaccessframe_id_t-frame_id"><strong><code>RecordAccess(frame_id_t frame_id)</code></strong></a></li>
+        <li><a href="#removeframe_id_t-frame_id"><strong><code>Remove(frame_id_t frame_id)</code></strong></a></li>
+        <li><a href="#setevictableframe_id_t-frame_id-bool-set_evictable"><strong><code>SetEvictable(frame_id_t frame_id, bool set_evictable)</code></strong></a></li>
+      </ul>
+    </li>
+    <li><a href="#disk-scheduler">Disk Scheduler</a>
+      <ul>
+        <li><a href="#schedulediskrequest-r"><strong><code>Schedule(DiskRequest r)</code></strong></a></li>
+        <li><a href="#startworkerthread"><strong><code>StartWorkerThread()</code></strong></a></li>
+      </ul>
+    </li>
+    <li><a href="#disk-manager">Disk Manager</a></li>
+    <li><a href="#buffer-pool-manager">Buffer Pool Manager</a>
+      <ul>
+        <li><a href="#newpagepage_id_t-page_id"><strong><code>NewPage(page_id_t* page_id)</code></strong></a></li>
+        <li><a href="#fetchpagepage_id_t-page_id"><strong><code>FetchPage(page_id_t page_id)</code></strong></a></li>
+        <li><a href="#unpinpagepage_id_t-page_id-bool-is_dirty"><strong><code>UnpinPage(page_id_t page_id, bool is_dirty)</code></strong></a></li>
+        <li><a href="#flushpagepage_id_t-page_id"><strong><code>FlushPage(page_id_t page_id)</code></strong></a></li>
+        <li><a href="#deletepagepage_id_t-page_id"><strong><code>DeletePage(page_id_t page_id)</code></strong></a></li>
+        <li><a href="#flushallpages"><strong><code>FlushAllPages()</code></strong></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="buffer_pool">Buffer_pool</h2>
+<p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/buffer_pool.png"
+        data-srcset="./pics/buffer_pool.png, ./pics/buffer_pool.png 1.5x, ./pics/buffer_pool.png 2x"
+        data-sizes="auto"
+        alt="./pics/buffer_pool.png"
+        title="buffer_pool" /></p>
+<p>实现的时候需要保证<strong>线程安全</strong>。多个线程可以同时访问内部数据结构，并且必须确保关键部分收到<code>latch</code>的保护。</p>
+<h2 id="lru-k-更换策略">LRU-K 更换策略</h2>
+<p>这个组件负责跟踪缓冲池的页面使用情况。<code>LRUKReplacer</code>的最大大小与缓冲池的大小相同，但并非 replacer 中的所有帧都被视为可驱逐。<code>LRUKReplacer</code>的大小由可驱逐帧的数量表示。</p>
+<p>LRU-K 算法移出其<strong>后向 k 距离</strong>为replacer中所有帧的最大值的帧。向后 k 距离的计算方法是当前时间戳与第 k 次访问的时间戳之间的时间差。历史访问次数少于 k 次的帧将为其后 k 距离指定 +inf。
+<strong>当多个帧具有 +inf 向后 k 距离时，实施普通的LRU</strong>。</p>
+<h3 id="evictframe_id_t-frame_id---bool"><strong><code>Evict(frame_id_t* frame_id) -&gt; bool</code></strong></h3>
+<blockquote>
+<p>驱逐具有最大向后 k 距离的帧。将帧 ID 存储在 output 参数中并返回 True。如果没有可驱逐的帧，则返回 False。</p>
+</blockquote>
+<ol>
+<li>获取latch，判断如果当前大小为0，则返回false。</li>
+<li>构建<code>tuple(id, kthTimestamp, mostRecentTimestamp)</code>来存储节点信息，然后创建一个<code>vector&lt;tuple&gt;</code>，遍历node_store_中的所有节点，把每个节点的信息用tuple的形式放进vector中。vector为空则返回false。</li>
+<li>实现一个临时的cmp排序函数，对vector中元素进行排序<code>std::sort(vec.begin(), vec.end(), cmp)</code>，排在第一个的元素就是需要被驱逐的节点。清除节点历史、置为不可驱逐、replacer大小减1、赋值frame_id。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">cmp</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">frame_id_t</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">size_t</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">frame_id_t</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">size_t</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">!=</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="recordaccessframe_id_t-frame_id"><strong><code>RecordAccess(frame_id_t frame_id)</code></strong></h3>
+<blockquote>
+<p>记录在当前时间戳访问给定的帧 ID。应在 <code>BufferPoolManager</code> 中固定页面后调用此方法。</p>
+</blockquote>
+<ol>
+<li>获取latch，frame_id不超过<code>replacer_size_</code>，否则throw exception。</li>
+<li>当前时间戳加1，先在<code>node_store_</code>找frame_id，找到了就直接把当前时间戳添加到该帧的访问历史中，否则新建一个节点，添加访问历史，并把新节点emplace到<code>node_store_</code>中。</li>
+</ol>
+<h3 id="removeframe_id_t-frame_id"><strong><code>Remove(frame_id_t frame_id)</code></strong></h3>
+<blockquote>
+<p>清除与框架关联的所有访问历史记录。仅当在 <code>BufferPoolManager</code> 中删除页面时，才应调用此方法。</p>
+</blockquote>
+<ol>
+<li>获取latch，frame_id不超过<code>replacer_size_</code>，否则throw exception。</li>
+<li>在<code>node_store_</code>找该帧，若没找到或者找到了但不可驱逐，直接return。</li>
+<li>拿到该帧，清除访问历史，置为不可驱逐，replacer当前大小减1。</li>
+</ol>
+<h3 id="setevictableframe_id_t-frame_id-bool-set_evictable"><strong><code>SetEvictable(frame_id_t frame_id, bool set_evictable)</code></strong></h3>
+<blockquote>
+<p>该方法控制帧是否可驱逐。它还控制 <code>LRUKReplacer</code> 的大小。在实现 <code>BufferPoolManager</code> 时当页面的 <code>pin count</code> 达到 0 时，其对应的帧被标记为 evictable 并且 replacer 的大小会增加。</p>
+</blockquote>
+<ol>
+<li>获取latch，frame_id不超过<code>replacer_size_</code>，否则throw exception。</li>
+<li>在<code>node_store_</code>找该帧，若没找到，直接return。</li>
+<li>找到该帧之后，判断若是由unevictable变为evictable，则replacer当前大小加1，反之replacer当前大小减1。设置该帧可驱逐与否。</li>
+</ol>
+<h2 id="disk-scheduler">Disk Scheduler</h2>
+<p>该组件负责调度<code>DiskManager</code>上的读写操作。<code>BufferPoolManager</code> 可以使用磁盘调度程序disk scheduler对磁盘请求进行排队，磁盘调度程序将维护一个后台工作线程，负责处理调度的请求。</p>
+<p>磁盘调度程序将利用<strong>共享队列</strong>来调度和处理磁盘请求。一个线程将向队列添加一个请求，磁盘调度程序的后台工作人员将处理排队的请求。项目已提供了一个<code>Channel</code>类 <code>src/include/common/channel.h</code> 以促进线程之间安全共享数据。</p>
+<h3 id="schedulediskrequest-r"><strong><code>Schedule(DiskRequest r)</code></strong></h3>
+<blockquote>
+<p>安排<code>DiskManager</code>执行的请求。 <code>DiskRequest</code>结构指定请求是否为读/写、数据应写入/从何处以及操作的页 ID。 <code>DiskRequest</code>还包含一个<code>std::promise</code>一旦处理请求，其值应设置为 true。</p>
+</blockquote>
+<ol>
+<li>将请求添加到共享队列中</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">request_queue_</span><span class="p">.</span><span class="n">Put</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_optional</span><span class="o">&lt;</span><span class="n">DiskRequest</span><span class="o">&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">r</span><span class="p">)));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="startworkerthread"><strong><code>StartWorkerThread()</code></strong></h3>
+<blockquote>
+<p>此方法负责获取排队的请求并将它们分派到<code>DiskManager</code>。请记住在<code>DiskRequest</code>的回调中设置值，以向请求发出者发出请求已完成的信号。在调用 <code>DiskScheduler</code>的析构函数之前，该值不应返回。</p>
+</blockquote>
+<ol>
+<li>循环查看是否有请求，有请求就调用<code>DiskManager</code>的<code>ReadPage</code>或<code>WritePage</code>方法，然后执行回调设置值。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">DiskScheduler</span><span class="o">::</span><span class="n">StartWorkerThread</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">DiskRequest</span><span class="o">&gt;</span> <span class="n">request</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 是否循环看request.has_value()
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">while</span> <span class="p">((</span><span class="n">request</span> <span class="o">=</span> <span class="n">request_queue_</span><span class="p">.</span><span class="n">Get</span><span class="p">(),</span> <span class="n">request</span><span class="p">.</span><span class="n">has_value</span><span class="p">()))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">request</span><span class="o">-&gt;</span><span class="n">is_write_</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">disk_manager_</span><span class="o">-&gt;</span><span class="n">WritePage</span><span class="p">(</span><span class="n">request</span><span class="o">-&gt;</span><span class="n">page_id_</span><span class="p">,</span> <span class="n">request</span><span class="o">-&gt;</span><span class="n">data_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">disk_manager_</span><span class="o">-&gt;</span><span class="n">ReadPage</span><span class="p">(</span><span class="n">request</span><span class="o">-&gt;</span><span class="n">page_id_</span><span class="p">,</span> <span class="n">request</span><span class="o">-&gt;</span><span class="n">data_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">request</span><span class="o">-&gt;</span><span class="n">callback_</span><span class="p">.</span><span class="n">set_value</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="disk-manager">Disk Manager</h2>
+<p>磁盘管理器类<code>Disk Manager</code>从磁盘读取页面数据并将其写入磁盘。您的磁盘调度程序在处理读取或写入请求时将使用磁盘管理器的<code>ReadPage()</code>和<code>WritePage()</code>。</p>
+<h2 id="buffer-pool-manager">Buffer Pool Manager</h2>
+<p><code>BufferPoolManager</code>负责使用<code>DiskScheduler</code>从磁盘获取数据库页面并将其存储在内存中。当明确指示执行此操作或需要逐出页面以为新页面腾出空间时， <code>BufferPoolManager</code>还可以安排将脏页面写入磁盘。</p>
+<p>实验文档中<strong>强调</strong>，这里需要理解的是：系统里所有内存的页面都是由<code>Page</code>对象表示，<code>BufferPoolManager</code>也不需要了解页面的内容，但是作为开发人员，你需要认识到<code>Page</code>对象只是bufferpool中内存的<strong>容器</strong>。也就是说，每个<code>Page</code>对象都包含了一块内存空间，用来存放从磁盘读取的<strong>物理页面</strong>的内容。当数据在磁盘上来回移动时， <code>BufferPoolManager</code>将重用相同的<code>Page</code>对象来存储数据。这意味着在系统的整个生命周期中，同一个<code>Page</code>对象可能包含不同的物理页。 <code>Page</code>对象的标识符(<code>page_id</code>)跟踪它包含的物理页。</p>
+<h3 id="newpagepage_id_t-page_id"><strong><code>NewPage(page_id_t* page_id)</code></strong></h3>
+<blockquote>
+<p>当您想要在<code>NewPage()</code>中创建新页面时， <code>AllocatePage</code>私有方法为<code>BufferPoolManager</code>提供唯一的新页面 id。</p>
+</blockquote>
+<ol>
+<li>获取latch，若<code>free_list_</code>不空，则取出<code>free_list_</code>的第一个元素（也可以不是第一个）作为<code>frame_id</code>，然后pop掉。否则，用<code>LRUKReplacer</code>的<code>Evict</code>方法获取一个<code>frame_id</code>，若驱逐失败，直接返回nullptr，驱逐成功则先从<code>page_table_</code>中erase掉该<code>frame_id</code>对应的page。</li>
+<li>通过<code>pages</code>数组和<code>frame_id</code>获取该页面，如果该页是脏页，需要先写回磁盘，了解promise和future的使用方法。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="n">page</span> <span class="o">=</span> <span class="n">pages_</span> <span class="o">+</span> <span class="n">frame_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">IsDirty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// use promise and future to implement the communication between threads
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">auto</span> <span class="n">promise</span> <span class="o">=</span> <span class="n">disk_scheduler_</span><span class="o">-&gt;</span><span class="n">CreatePromise</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">future</span> <span class="o">=</span> <span class="n">promise</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">disk_scheduler_</span><span class="o">-&gt;</span><span class="n">Schedule</span><span class="p">({</span><span class="nb">true</span><span class="p">,</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">GetData</span><span class="p">(),</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">GetPageId</span><span class="p">(),</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">promise</span><span class="p">)});</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// wait till promise is fulfilled
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">future</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">page</span><span class="o">-&gt;</span><span class="n">is_dirty_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li>用<code>AllocatePage()</code>分配一个页面id，执行一系列初始化，返回页面。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="n">page</span><span class="o">-&gt;</span><span class="n">page_id_</span> <span class="o">=</span> <span class="n">AllocatePage</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page</span><span class="o">-&gt;</span><span class="n">ResetMemory</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page</span><span class="o">-&gt;</span><span class="n">pin_count_</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page_table_</span><span class="p">[</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">page_id_</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">replacer_</span><span class="o">-&gt;</span><span class="n">SetEvictable</span><span class="p">(</span><span class="n">frame_id</span><span class="p">,</span> <span class="nb">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">replacer_</span><span class="o">-&gt;</span><span class="n">RecordAccess</span><span class="p">(</span><span class="n">frame_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="n">page_id</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">page_id_</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="fetchpagepage_id_t-page_id"><strong><code>FetchPage(page_id_t page_id)</code></strong></h3>
+<blockquote>
+<p>对于<code>FetchPage</code> ，如果空闲列表中没有可用页面且所有其他页面当前均已固定，则应返回 nullptr。</p>
+</blockquote>
+<ol>
+<li>获取latch，如果<code>page_id</code>等于INVALID_PAGE_ID，返回nullptr。</li>
+<li>如果在<code>page_table_</code>中找到了该page_id，则取出对应的<code>frame_id</code>，然后用<code>pages</code>数组得到page。<code>replacer_</code>记录它的访问、置为不可驱逐、pin加一。返回该page。</li>
+<li>若是没有找到，则要通过<code>free_list_</code>或者驱逐来获得一个<code>frame_id</code>，同理<code>NewPage()</code>的时候也要先执行写回磁盘。</li>
+<li>修改<code>page_table_</code>，同理<code>NewPage()</code>执行一系列初始化，然后利用<code>disk_scheduler_</code>修改从磁盘读取物理页面，存入page后返回。</li>
+</ol>
+<h3 id="unpinpagepage_id_t-page_id-bool-is_dirty"><strong><code>UnpinPage(page_id_t page_id, bool is_dirty)</code></strong></h3>
+<blockquote>
+<p>对于<code>UnpinPage</code> ， is_dirty 参数跟踪页面在固定时是否被修改。</p>
+</blockquote>
+<ol>
+<li>获取latch，如果<code>page_table_</code>中没找到，返回false。</li>
+<li>拿到page，若是<code>pin_count_</code>以及为0，返回false。</li>
+<li><code>pin_count_</code>减1，若减完之后为0，置为可驱逐，然后注意<code>is_dirty_</code>设置为<code>is_dirty || page-&gt;is_dirty_</code>。</li>
+</ol>
+<h3 id="flushpagepage_id_t-page_id"><strong><code>FlushPage(page_id_t page_id)</code></strong></h3>
+<blockquote>
+<p><code>FlushPage</code>应该刷新页面，无论其 pin 状态如何。</p>
+</blockquote>
+<ol>
+<li>获取latch，<code>page_id</code>不合法或者没在<code>page_table_</code>中没找到，返回false。</li>
+<li>拿到page，用<code>disk_scheduler_</code>写回磁盘。<code>is_dirty_</code>置为false。</li>
+</ol>
+<h3 id="deletepagepage_id_t-page_id"><strong><code>DeletePage(page_id_t page_id)</code></strong></h3>
+<blockquote>
+<p><code>DeallocatePage()</code>方法是一个空操作，它模拟释放磁盘上的页面，您应该在<code>DeletePage()</code>实现中调用它。</p>
+</blockquote>
+<ol>
+<li>获取latch，若<code>page_id</code>不合法，返回false。若是在<code>page_table_</code>中没找到，先执行<code>DeallocatePage(page_id)</code>，返回true。</li>
+<li>拿到page，如果<code>pin_count_</code>不为0，返回false。</li>
+<li>执行一系列删除相关操作后<code>DeallocatePage(page_id)</code>。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="n">page_table_</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">page_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">replacer_</span><span class="o">-&gt;</span><span class="n">Remove</span><span class="p">(</span><span class="n">frame_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">free_list_</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">frame_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page</span><span class="o">-&gt;</span><span class="n">ResetMemory</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page</span><span class="o">-&gt;</span><span class="n">page_id_</span> <span class="o">=</span> <span class="n">INVALID_PAGE_ID</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page</span><span class="o">-&gt;</span><span class="n">is_dirty_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page</span><span class="o">-&gt;</span><span class="n">pin_count_</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">DeallocatePage</span><span class="p">(</span><span class="n">page_id</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="flushallpages"><strong><code>FlushAllPages()</code></strong></h3>
+<p>写回所有页面到磁盘</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-01-13</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/cmu15445-buffer_pool/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer_pool"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer_pool"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer_pool"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer_pool"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/cmu15445-trie/" class="prev" rel="prev" title="Cmu15445 Trie"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Cmu15445 Trie</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.140.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2022 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":50},"comment":{}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

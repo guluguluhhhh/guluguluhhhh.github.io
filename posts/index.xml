@@ -3,7 +3,16 @@
         <title>All Posts - 华子的博客</title>
         <link>https://guluguluhhhh.github.io/posts/</link>
         <description>All Posts | 华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 13 Jan 2025 09:55:13 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 13 Jan 2025 16:49:33 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Cmu15445 Buffer_pool</title>
+    <link>https://guluguluhhhh.github.io/cmu15445-buffer_pool/</link>
+    <pubDate>Mon, 13 Jan 2025 16:49:33 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>https://guluguluhhhh.github.io/cmu15445-buffer_pool/</guid>
+    <description><![CDATA[<h2 id="buffer_pool">Buffer_pool</h2>
+<p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p>]]></description>
+</item>
+<item>
     <title>Cmu15445 Trie</title>
     <link>https://guluguluhhhh.github.io/cmu15445-trie/</link>
     <pubDate>Mon, 13 Jan 2025 09:55:13 &#43;0800</pubDate>

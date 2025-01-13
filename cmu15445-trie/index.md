@@ -19,6 +19,7 @@ trie 实现的是键值存储，字符串键可以映射到任何类型值。键
 
 ### implement
 #### **`Get(key)`**
+> 获取 key 对应的值。
 
 1. 遍历key的每一个字符，从当前root开始，通过查看每个字符是否在`current->children_`中，没找到或者current为空直接返回nullptr，找到了就把current更新为`current->children_.at(ch)`。
 1. 经过上一步骤之后，现在current就是key对应的值节点。然后利用`dynamic_cast`把它转换为`const TrieNodeWithValue<T> *`。若是转换后为nullptr，说明类型不匹配，直接返回nullptr，否则返回该节点。
@@ -27,6 +28,7 @@ auto *node{dynamic_cast<const TrieNodeWithValue<T> *>(current.get())};
 ```
 
 #### **`Put(key, value)`**
+> 为 key 设置对应的值。如果键已存在，则覆盖现有值。请注意，值的类型可能是不可复制的（即 std：：unique_ptr<int>）。此方法返回一个新的 trie。
 
 1. 如果key.empty()。判断root是否有孩子，若有孩子，用孩子和传入的value创建一个new_root返回，否则直接用value创建new_root返回。
 ```c++
@@ -43,6 +45,7 @@ auto *node{dynamic_cast<const TrieNodeWithValue<T> *>(current.get())};
 1. 若是遍历到最后一个字符，判断是否有对应的孩子，同理1，若有则用这个孩子的children_和传入的value创建一个TrieNodeWithValue，若没有就直接用value创建。建好了之后连上当前的`clone_current->children_[ch] = new_child`就大功告成。返回新的root。
 
 #### **`Remove(key)`**
+> 删除 key 的值。此方法返回一个新的 trie。
 
 1. 还是先处理边界情况，若`!root_`直接返回*this。若`key.empty()`：先克隆当前root，有孩子就用孩子创建一个无值节点返回，没孩子直接返回nullptr。
 1. 开始遍历key，任何一个节点没找到则直接返回*this，并把路上经过的每一个节点克隆一遍放入一个vector（或者直接用stack）中，并前后连接上。遍历完后把最后一个节点的`is_value_node`置为false。
