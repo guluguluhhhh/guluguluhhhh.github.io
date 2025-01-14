@@ -1,7 +1,7 @@
 # Cmu15445 Extendible Hash Index
 
 
-## Extendible Hash Index
+# Extendible Hash Index
 在此编程项目中，将使用**可扩展哈希**的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。
 
 下图显示了一个可扩展哈希表，其中`header`页最大深度为 2，`directory`页最大深度为 2，存储`bucket`页最多包含两个条目。值被省略，并且**键的哈希值**显示在`bucket`页面中，而不是键本身。

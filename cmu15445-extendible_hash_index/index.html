@@ -88,7 +88,6 @@
                 </div>
                 <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
   <ul>
-    <li><a href="#extendible-hash-index">Extendible Hash Index</a></li>
     <li><a href="#readwrite-page-guards">Read/Write Page Guards</a>
       <ul>
         <li><a href="#pageguardpageguard-that"><strong><code>PageGuard(PageGuard &amp;&amp;that)</code></strong></a></li>
@@ -122,7 +121,7 @@
     <li><a href="#concurrency-control">Concurrency Control</a></li>
   </ul>
 </nav></div>
-            </div><div class="content" id="content"><h2 id="extendible-hash-index">Extendible Hash Index</h2>
+            </div><div class="content" id="content"><h1 id="extendible-hash-index">Extendible Hash Index</h1>
 <p>在此编程项目中，将使用<strong>可扩展哈希</strong>的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。</p>
 <p>下图显示了一个可扩展哈希表，其中<code>header</code>页最大深度为 2，<code>directory</code>页最大深度为 2，存储<code>bucket</code>页最多包含两个条目。值被省略，并且<strong>键的哈希值</strong>显示在<code>bucket</code>页面中，而不是键本身。</p>
 <p><img
