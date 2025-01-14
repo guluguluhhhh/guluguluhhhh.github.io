@@ -4,10 +4,10 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="noodp" />
-        <title>Cmu15445 Buffer_pool - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="https://guluguluhhhh.github.io/cmu15445-buffer_pool/">
+        <title>Cmu15445 Buffer Pool - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="https://guluguluhhhh.github.io/cmu15445-buffer_pool/">
   <meta property="og:site_name" content="华子的博客">
-  <meta property="og:title" content="Cmu15445 Buffer_pool">
-  <meta property="og:description" content="Buffer_pool 这个project是要在存储管理器中实现一个buffer pool，即缓冲池。缓冲池其实就是一块大的内存区域主内存，负责与磁盘之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符page_id_t想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。">
+  <meta property="og:title" content="Cmu15445 Buffer Pool">
+  <meta property="og:description" content="Buffer Pool 这个project是要在存储管理器中实现一个buffer pool，即缓冲池。缓冲池其实就是一块大的内存区域主内存，负责与磁盘之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符page_id_t想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。">
   <meta property="og:locale" content="zh_CN">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -15,8 +15,8 @@
     <meta property="article:modified_time" content="2025-01-13T16:49:33+08:00">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Cmu15445 Buffer_pool">
-  <meta name="twitter:description" content="Buffer_pool 这个project是要在存储管理器中实现一个buffer pool，即缓冲池。缓冲池其实就是一块大的内存区域主内存，负责与磁盘之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符page_id_t想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。">
+  <meta name="twitter:title" content="Cmu15445 Buffer Pool">
+  <meta name="twitter:description" content="Buffer Pool 这个project是要在存储管理器中实现一个buffer pool，即缓冲池。缓冲池其实就是一块大的内存区域主内存，负责与磁盘之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符page_id_t想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。">
 <meta name="application-name" content="华子的博客">
 <meta name="apple-mobile-web-app-title" content="华子的博客"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -26,12 +26,12 @@
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
-        "headline": "Cmu15445 Buffer_pool",
+        "headline": "Cmu15445 Buffer Pool",
         "inLanguage": "zh-CN",
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/guluguluhhhh.github.io\/cmu15445-buffer_pool\/"
-        },"genre": "posts","wordcount":  3648 ,
+        },"genre": "posts","wordcount":  3649 ,
         "url": "https:\/\/guluguluhhhh.github.io\/cmu15445-buffer_pool\/","datePublished": "2025-01-13T16:49:33+08:00","dateModified": "2025-01-13T16:49:33+08:00","publisher": {
             "@type": "Organization",
             "name": ""},"author": {
@@ -75,9 +75,9 @@
                 <div class="container"><div class="toc" id="toc-auto">
             <h2 class="toc-title">Contents</h2>
             <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Cmu15445 Buffer_pool</h1><div class="post-meta">
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Cmu15445 Buffer Pool</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-01-13">2025-01-13</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;3648 words&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-01-13">2025-01-13</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;3649 words&nbsp;
                 <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;8 minutes&nbsp;</div>
         </div><div class="details toc" id="toc-static"  data-kept="">
                 <div class="details-summary toc-title">
@@ -86,7 +86,7 @@
                 </div>
                 <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
   <ul>
-    <li><a href="#buffer_pool">Buffer_pool</a></li>
+    <li><a href="#buffer-pool">Buffer Pool</a></li>
     <li><a href="#lru-k-更换策略">LRU-K 更换策略</a>
       <ul>
         <li><a href="#evictframe_id_t-frame_id---bool"><strong><code>Evict(frame_id_t* frame_id) -&gt; bool</code></strong></a></li>
@@ -114,7 +114,7 @@
     </li>
   </ul>
 </nav></div>
-            </div><div class="content" id="content"><h2 id="buffer_pool">Buffer_pool</h2>
+            </div><div class="content" id="content"><h2 id="buffer-pool">Buffer Pool</h2>
 <p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p>
 <p><img
         class="lazyload"
@@ -370,7 +370,7 @@
                             <a class="link-to-markdown" href="/cmu15445-buffer_pool/index.md" target="_blank">Read Markdown</a>
                         </span></div>
             <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer_pool"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer_pool"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer_pool"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer_pool"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer Pool"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer Pool"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer Pool"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" data-title="Cmu15445 Buffer Pool"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
             </div>
         </div>
     </div>

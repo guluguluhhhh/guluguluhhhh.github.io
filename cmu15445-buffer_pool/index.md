@@ -1,7 +1,7 @@
-# Cmu15445 Buffer_pool
+# Cmu15445 Buffer Pool
 
 
-## Buffer_pool
+## Buffer Pool
 这个project是要在存储管理器中实现一个buffer pool，即**缓冲池**。缓冲池其实就是一块大的内存区域**主内存**，负责与**磁盘**之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符`page_id_t`想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。
 
 ![buffer_pool](./pics/buffer_pool.png)
