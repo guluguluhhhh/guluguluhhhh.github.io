@@ -1,7 +1,7 @@
 # Cmu15445 Trie
 
 
-## Trie
+# Trie
 trie 实现的是键值存储，字符串键可以映射到任何类型值。键的值存储在改键的最后一个字符的终端节点。例如将（“ab”， 1） 和 （“ac”， “val”） 插入到 trie 中。
 ![trie01](./pics/trie-01.svg)
 
@@ -106,4 +106,5 @@ auto Planner::GetFuncCallFromFactory(const std::string &func_name, std::vector<A
 }
 ```
 
+![score](./pics/cmu_project0.jpg)
 

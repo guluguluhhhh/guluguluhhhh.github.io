@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Cmu15445 Extendible Hash Index - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/">
+  <meta property="og:site_name" content="华子的博客">
+  <meta property="og:title" content="Cmu15445 Extendible Hash Index">
+  <meta property="og:description" content="Extendible Hash Index 在此编程项目中，将使用可扩展哈希的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。
+下图显示了一个可扩展哈希表，其中header页最大深度为 2，directory页最大深度为 2，存储bucket页最多包含两个条目。值被省略，并且键的哈希值显示在bucket页面中，而不是键本身。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-01-14T12:41:00+08:00">
+    <meta property="article:modified_time" content="2025-01-14T12:41:00+08:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Cmu15445 Extendible Hash Index">
+  <meta name="twitter:description" content="Extendible Hash Index 在此编程项目中，将使用可扩展哈希的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。
+下图显示了一个可扩展哈希表，其中header页最大深度为 2，directory页最大深度为 2，存储bucket页最多包含两个条目。值被省略，并且键的哈希值显示在bucket页面中，而不是键本身。">
+<meta name="application-name" content="华子的博客">
+<meta name="apple-mobile-web-app-title" content="华子的博客"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/" /><link rel="prev" href="https://guluguluhhhh.github.io/cmu15445-buffer_pool/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Cmu15445 Extendible Hash Index",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/guluguluhhhh.github.io\/cmu15445-extendible_hash_index\/"
+        },"genre": "posts","wordcount":  5804 ,
+        "url": "https:\/\/guluguluhhhh.github.io\/cmu15445-extendible_hash_index\/","datePublished": "2025-01-14T12:41:00+08:00","dateModified": "2025-01-14T12:41:00+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "huazi"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="华子的博客">华子的博客</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+             
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="华子的博客">华子的博客</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a>
+ 
+        </div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Cmu15445 Extendible Hash Index</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-01-14">2025-01-14</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;5804 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;12 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#extendible-hash-index">Extendible Hash Index</a></li>
+    <li><a href="#readwrite-page-guards">Read/Write Page Guards</a>
+      <ul>
+        <li><a href="#pageguardpageguard-that"><strong><code>PageGuard(PageGuard &amp;&amp;that)</code></strong></a></li>
+        <li><a href="#operatorpageguard-that"><strong><code>operator=(PageGuard &amp;&amp;that)</code></strong></a></li>
+        <li><a href="#drop"><strong><code>Drop()</code></strong></a></li>
+        <li><a href="#pageguard"><strong><code>~PageGuard()</code></strong></a></li>
+        <li><a href="#upgraderead"><strong><code>UpgradeRead()</code></strong></a></li>
+        <li><a href="#upgradewrite"><strong><code>UpgradeWrite()</code></strong></a></li>
+        <li><a href="#fetchpagebasicpage_id_t-page_id"><strong><code>FetchPageBasic(page_id_t page_id)</code></strong></a></li>
+        <li><a href="#fetchpagereadpage_id_t-page_id"><strong><code>FetchPageRead(page_id_t page_id)</code></strong></a></li>
+        <li><a href="#fetchpagewritepage_id_t-page_id"><strong><code>FetchPageWrite(page_id_t page_id)</code></strong></a></li>
+        <li><a href="#newpageguardedpage_id_t-page_id"><strong><code>NewPageGuarded(page_id_t *page_id)</code></strong></a></li>
+      </ul>
+    </li>
+    <li><a href="#extendible-hash-table-pages">Extendible Hash Table Pages</a>
+      <ul>
+        <li><a href="#header-page">Header Page</a></li>
+        <li><a href="#directory-page">Directory Page</a></li>
+        <li><a href="#bucket-page">Bucket Page</a></li>
+      </ul>
+    </li>
+    <li><a href="#extendible-hashing-implementation">Extendible Hashing Implementation</a>
+      <ul>
+        <li><a href="#diskextendiblehashtable"><strong><code>DiskExtendibleHashTable</code></strong></a></li>
+        <li><a href="#getvalue"><strong><code>GetValue</code></strong></a></li>
+        <li><a href="#splitbucket"><strong><code>SplitBucket</code></strong></a></li>
+        <li><a href="#insert"><strong><code>Insert</code></strong></a></li>
+        <li><a href="#remove"><strong><code>Remove</code></strong></a></li>
+      </ul>
+    </li>
+    <li><a href="#concurrency-control">Concurrency Control</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="extendible-hash-index">Extendible Hash Index</h2>
+<p>在此编程项目中，将使用<strong>可扩展哈希</strong>的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。</p>
+<p>下图显示了一个可扩展哈希表，其中<code>header</code>页最大深度为 2，<code>directory</code>页最大深度为 2，存储<code>bucket</code>页最多包含两个条目。值被省略，并且<strong>键的哈希值</strong>显示在<code>bucket</code>页面中，而不是键本身。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/structure.jpg#pic_center"
+        data-srcset="./pics/structure.jpg#pic_center, ./pics/structure.jpg#pic_center 1.5x, ./pics/structure.jpg#pic_center 2x"
+        data-sizes="auto"
+        alt="./pics/structure.jpg#pic_center"
+        title="extendible_hash_table" /></p>
+<p>该索引提供快速数据检索，无需搜索数据库表中的每一行，从而实现快速随机查找。实现应该支持线程安全的<strong>搜索</strong>、<strong>插入</strong>和<strong>删除</strong>（包括<strong>增长</strong>/<strong>收缩目录和拆分</strong>/<strong>合并桶</strong>）。</p>
+<h2 id="readwrite-page-guards">Read/Write Page Guards</h2>
+<p>在<code>Buffer Pool Manager</code>中， <code>FetchPage</code>和<code>NewPage</code>函数返回指向已固定页面的指针。固定机制确保页面不会被逐出，直到页面上不再有任何读写操作。为了表明内存中不再需要该页，程序员必须手动调用<code>UnpinPage</code>。</p>
+<p>另一方面，如果程序员忘记调用<code>UnpinPage</code> ，该页将永远不会被从缓冲池中逐出。由于缓冲池实际上以较少数量的帧运行，因此将有更多的页面进出磁盘的交换。不仅性能受到影响，而且错误也很难被发现。</p>
+<p>所以第一个任务将实现<code>BasicPageGuard</code> ，它存储指向<code>BufferPoolManager</code>和<code>Page</code>对象的指针。页面防护确保一旦超出范围，就会在相应的<code>Page</code>对象上调用<code>UnpinPage</code> 。请注意，它仍然应该公开一个方法，供程序员手动取消固定页面。</p>
+<p>由于<code>BasicPageGuard</code>隐藏了底层<code>Page</code>指针，因此它还可以提供只读/写入数据 API，这些 API 提供编译时检查，以确保为每个用例正确设置<code>is_dirty</code>标志。</p>
+<p>在<code>Page</code>类中，有用于多线程保护的<code>latch</code>方法。与取消固定页面类似，程序员可能会忘记在使用页面后解锁页面。为了缓解这个问题，您将实现<code>ReadPageGuard</code>和<code>WritePageGuard</code>一旦页面超出范围，它们就会自动解锁页面。</p>
+<p>需要为所有<code>BasicPageGuard</code> 、 <code>ReadPageGuard</code>和<code>WritePageGuard</code>实现以下函数。</p>
+<h3 id="pageguardpageguard-that"><strong><code>PageGuard(PageGuard &amp;&amp;that)</code></strong></h3>
+<blockquote>
+<p><strong>移动构造函数</strong>。拷贝构造函数和拷贝赋值的目的是将一个对象<strong>复制</strong>到另一个对象，而<strong>移动构造函数</strong>和<strong>移动赋值</strong>的目的是将<strong>资源的所有权从一个对象转移到另一个对象</strong>(这通常比复制成本低得多)。实现拷贝语义时需要使用<strong>const类型的左值引用</strong>作为形参，而实现移动语义时，需要使用<strong>非const的右值</strong>形参。</p>
+</blockquote>
+<ol>
+<li>转移资源所有权（之后释放原来对象对资源的管理）。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">BasicPageGuard</span><span class="o">::</span><span class="n">BasicPageGuard</span><span class="p">(</span><span class="n">BasicPageGuard</span> <span class="o">&amp;&amp;</span><span class="n">that</span><span class="p">)</span> <span class="k">noexcept</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:</span> <span class="n">bpm_</span><span class="p">(</span><span class="n">that</span><span class="p">.</span><span class="n">bpm_</span><span class="p">),</span> <span class="n">page_</span><span class="p">(</span><span class="n">that</span><span class="p">.</span><span class="n">page_</span><span class="p">),</span> <span class="n">is_dirty_</span><span class="p">(</span><span class="n">that</span><span class="p">.</span><span class="n">is_dirty_</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">that</span><span class="p">.</span><span class="n">page_</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">that</span><span class="p">.</span><span class="n">bpm_</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">that</span><span class="p">.</span><span class="n">is_dirty_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="operatorpageguard-that"><strong><code>operator=(PageGuard &amp;&amp;that)</code></strong></h3>
+<blockquote>
+<p><strong>移动赋值运算符</strong>。</p>
+</blockquote>
+<ol>
+<li>自我赋值检查。</li>
+<li>释放被赋值对象当前持有的资源。</li>
+<li>转移资源所有权。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">BasicPageGuard</span><span class="o">::</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">BasicPageGuard</span> <span class="o">&amp;&amp;</span><span class="n">that</span><span class="p">)</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="n">BasicPageGuard</span> <span class="o">&amp;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">that</span> <span class="o">==</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Drop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">bpm_</span> <span class="o">=</span> <span class="n">that</span><span class="p">.</span><span class="n">bpm_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page_</span> <span class="o">=</span> <span class="n">that</span><span class="p">.</span><span class="n">page_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">is_dirty_</span> <span class="o">=</span> <span class="n">that</span><span class="p">.</span><span class="n">is_dirty_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">that</span><span class="p">.</span><span class="n">page_</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">that</span><span class="p">.</span><span class="n">bpm_</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">that</span><span class="p">.</span><span class="n">is_dirty_</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="drop"><strong><code>Drop()</code></strong></h3>
+<blockquote>
+<p>Unpin and/or unlatch.</p>
+</blockquote>
+<ol>
+<li>如果<code>bpm_</code>和<code>page_</code>不为nullptr，执行<code>bpm_-&gt;UnpinPage</code>。</li>
+<li><code>bpm_</code>和<code>page_</code>置为nullptr。</li>
+</ol>
+<h3 id="pageguard"><strong><code>~PageGuard()</code></strong></h3>
+<blockquote>
+<p>析构函数。</p>
+</blockquote>
+<ol>
+<li>调用<code>Drop()</code>。</li>
+</ol>
+<p>还需要为<code>BasicPageGuard</code>实现以下升级功能。这些函数需要保证受保护的页面在升级过程中不会被从缓冲池中逐出。</p>
+<h3 id="upgraderead"><strong><code>UpgradeRead()</code></strong></h3>
+<blockquote>
+<p>升级到<code>ReadPageGuard</code>。</p>
+</blockquote>
+<ol>
+<li>如果page_不等于nullptr，上读锁RLatch()。</li>
+<li>当前资源所有权转移给<code>ReadPageGuard</code>，将它返回。</li>
+</ol>
+<h3 id="upgradewrite"><strong><code>UpgradeWrite()</code></strong></h3>
+<blockquote>
+<p>升级到<code>WritePageGuard</code>。</p>
+</blockquote>
+<ol>
+<li>如果page_不等于nullptr，上写锁WLatch()。</li>
+<li>当前资源所有权转移给<code>WritePageGuard</code>，将它返回。</li>
+</ol>
+<p>使用新的页面防护，在<code>BufferPoolManager</code>中实现以下包装器。</p>
+<h3 id="fetchpagebasicpage_id_t-page_id"><strong><code>FetchPageBasic(page_id_t page_id)</code></strong></h3>
+<ol>
+<li>调用<code>FetchPage</code>获取<code>page</code>，用<code>this</code>和<code>page</code>构造<code>BasicPageGuard</code>返回。</li>
+</ol>
+<h3 id="fetchpagereadpage_id_t-page_id"><strong><code>FetchPageRead(page_id_t page_id)</code></strong></h3>
+<ol>
+<li>调用<code>FetchPage</code>获取<code>page</code>，若不为nullptr则上读锁<code>RLatch()</code>。</li>
+<li>用<code>this</code>和<code>page</code>构造<code>ReadPageGuard</code>返回。</li>
+</ol>
+<h3 id="fetchpagewritepage_id_t-page_id"><strong><code>FetchPageWrite(page_id_t page_id)</code></strong></h3>
+<ol>
+<li>调用<code>FetchPage</code>获取<code>page</code>，若不为nullptr则上写锁<code>WLatch()</code>。</li>
+<li>用<code>this</code>和<code>page</code>构造<code>WritePageGuard</code>返回。</li>
+</ol>
+<h3 id="newpageguardedpage_id_t-page_id"><strong><code>NewPageGuarded(page_id_t *page_id)</code></strong></h3>
+<ol>
+<li>调用<code>NewPage</code>获取<code>page</code>，用<code>this</code>和<code>page</code>构造<code>BasicPageGuard</code>返回。</li>
+</ol>
+<h2 id="extendible-hash-table-pages">Extendible Hash Table Pages</h2>
+<p>每个可扩展哈希表头/目录/桶页对应于缓冲池取出的内存页的内容（即<code>data_</code>部分）。每次读取或写入页面时，必须首先从缓冲池中获取页面（使用其唯一的<code>page_id</code> ），重新解释将其转换为相应的类型，并在读取或写入页面后取消固定该页面。也就是利用任务1的<code>PageGuard</code> API来实现这个目标。</p>
+<h3 id="header-page">Header Page</h3>
+<p>标头页位于基于磁盘的可扩展哈希表的第一级，并且哈希表只有一个标头页。它存储指向目录页面的逻辑子指针。你可以把它想象成一个静态的一级目录页面。它有两个字段：</p>
+<ul>
+<li><em>directory_page_ids_</em>：<code>目录页面</code> id 的数组</li>
+<li><em>bucket_size_</em>：<code>标题页</code>可以处理的最大深度，也就是最开始图中的header(<code>2</code>)。</li>
+</ul>
+<p>需要实现：</p>
+<ol>
+<li>
+<p><code>Init(uint32_t max_depth)</code>：赋值max_depth_，directory_page_ids_数组中的值都置为INVALID_PAGE_ID。</p>
+</li>
+<li>
+<p><code>HashToDirectoryIndex(uint32_t hash)</code>：把hash右移32-max_depth_位，保留最高max_depth_位返回。</p>
+</li>
+<li>
+<p><code>GetDirectoryPageId(uint32_t directory_idx)</code></p>
+</li>
+<li>
+<p><code>SetDirectoryPageId(uint32_t directory_idx, page_id_t   directory_page_id)</code></p>
+</li>
+<li>
+<p><code>MaxSize()</code>：左移max_depth_位，2的max_depth次方。</p>
+</li>
+</ol>
+<h3 id="directory-page">Directory Page</h3>
+<p>目录页位于基于磁盘的可扩展哈希表的第二层。它们中的每一个都存储指向桶页面的逻辑子指针，以及用于处理桶映射和动态目录增长和收缩的元数据。目录页面有以下字段：</p>
+<ul>
+<li><em>max_depth_</em>：<code>标题页</code>可以处理的最大深度，对应图中directory(2/<code>2</code>)。</li>
+<li><em>global_depth_</em>：当前<code>目录</code>全局深度，对应图中directory(<code>2</code>/2)。</li>
+<li><em>local_depths_</em>：<code>桶页面</code>局部深度的数组，对应图中directory下面表格的第二列，<strong>表示最后几位相同就在同一个桶</strong>。例如，图中00和10对应的局部深度为1，他俩最后一位相同，所以在同一个桶，但01和11的局部深度为2，他俩就不在同一个桶。</li>
+<li><em>bucket_page_ids_</em>：<code>桶页面</code>id的数组</li>
+</ul>
+<p>部分需要实现的：</p>
+<ol>
+<li><code>Init(uint32_t max_depth)</code>：赋值max_depth_，local_depths_数组中的值都值为0，bucket_page_ids_数组中的值都置为INVALID_PAGE_ID。</li>
+<li><code>HashToBucketIndex(uint32_t hash)</code>：用<strong>与运算</strong>取hash最后global_depth_位。</li>
+<li><code>GetSplitImageIndex(uint32_t bucket_idx)</code>：可以理解为计算兄弟桶的id，将该bucket_id的最高位反转得到的值返回。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">return</span> <span class="n">bucket_idx</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">global_depth_</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="4">
+<li><code>IncrGlobalDepth()</code>：首先如果已经等于max_depth_，直接return。将目录增大小扩大一倍，操作相当于把现在的内容复制一遍给新增的那部分：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">ExtendibleHTableDirectoryPage</span><span class="o">::</span><span class="n">IncrGlobalDepth</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">global_depth_</span> <span class="o">&gt;=</span> <span class="n">max_depth_</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// double the size of the directory
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">global_depth_</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bucket_page_ids_</span><span class="p">[(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">global_depth_</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bucket_page_ids_</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">local_depths_</span><span class="p">[(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">global_depth_</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_depths_</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">global_depth_</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="5">
+<li><code>DecrGlobalDepth()</code>：若已经等于0，直接return。否则减一。</li>
+<li><code>CanShrink()</code>：GD等于零返回false。检查所有LD &lt; GD。</li>
+<li><code>IncrLocalDepth</code>和<code>DecrLocalDepth</code>：检查大小后直接增或减。</li>
+</ol>
+<h3 id="bucket-page">Bucket Page</h3>
+<p>桶页面位于基于磁盘的可扩展哈希表的第三层。它们是实际存储键值对的。有以下字段：</p>
+<ul>
+<li><em>size_</em>：桶中保存的键值对的数量。</li>
+<li><em>max_size_</em>：桶可以处理的最大键值对数量。</li>
+<li><em>array_</em>：大小为桶页面局部深度的数组，存储键值对数据。</li>
+</ul>
+<p>部分需要实现的：</p>
+<ol>
+<li><code>Lookup(const K &amp;key, V &amp;value, const KC &amp;cmp)</code>：查找key，如果找到了把key(array[i],first)对应的值(array[i].second)赋给value，返回true。</li>
+<li><code>Insert(const K &amp;key, const V &amp;value, const KC &amp;cmp)</code>：查找key，如果已经存在，返回false。如果key不存在，则插入到数组最后，size增加，返回true。</li>
+<li><code>Remove(const K &amp;key, const KC &amp;cmp)</code>：查找key，找到了就array_中后面的元素往前移一位，size减少，返回true。没找到返回false。</li>
+</ol>
+<h2 id="extendible-hashing-implementation">Extendible Hashing Implementation</h2>
+<p>实现对<strong>插入</strong>、<strong>搜索</strong>和<strong>删除</strong>的支持。要求要实现<strong>桶拆分/合并</strong>和<strong>目录增长/收缩</strong>。先了解一下实现关键点：</p>
+<ul>
+<li>
+<p><em>Empty Table</em>：第一次创建一个空哈希表时，它应该只有一个唯一的<code>Header Page</code>，<code>Directory pages</code> 和 <code>bucket pages</code>按需创建。</p>
+</li>
+<li>
+<p><em>Header Indexing</em>：通过前面的部分应该已经明白了，使用<strong>最高有效位</strong>来索引标题页中的<code>directory_page_ids_</code>数组。</p>
+</li>
+<li>
+<p><em>Directory Indexing</em>：使用<strong>最低有效位</strong>来索引目录页中的<code>bucket_page_ids_</code>数组。</p>
+</li>
+<li>
+<p><em>Bucket Splitting</em>：如果没有空间插入，则必须<strong>分裂桶</strong>。</p>
+</li>
+<li>
+<p><em>Bucket Merging</em>：当桶变空的时候必须尝试<strong>合并</strong>。有一些方法可以通过检查桶及其分割映像的占用情况来更积极地进行合并，但这些昂贵的检查和额外的合并可能会增加抖动。这里为了使事情相对简单，用以下规则：</p>
+<ol>
+<li>只能合并空桶。</li>
+<li>仅当其分割图像具有相同的局部深度时，桶才能与其分割图像合并。</li>
+<li>如果合并桶的<strong>新分割镜像</strong>为空，则应继续<strong>递归</strong>合并。</li>
+</ol>
+</li>
+<li>
+<p><em>Directory Growing</em>：意思就是目录会不断增长。</p>
+</li>
+<li>
+<p><em>Directory Shrinking</em>：仅当每个桶的局部深度严格小于目录的全局深度时才收缩目录。</p>
+</li>
+</ul>
+<h3 id="diskextendiblehashtable"><strong><code>DiskExtendibleHashTable</code></strong></h3>
+<blockquote>
+<p>构造函数</p>
+</blockquote>
+<ol>
+<li>主要是把传入的参数都赋值，然后用<code>NewPageGuarded</code>创建一个page guard，再用模版函数转换为<code>ExtendibleHTableHeaderPage</code>，执行init。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">header_guard</span> <span class="o">=</span> <span class="n">bpm</span><span class="o">-&gt;</span><span class="n">NewPageGuarded</span><span class="p">(</span><span class="o">&amp;</span><span class="n">header_page_id_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">header_page</span> <span class="o">=</span> <span class="n">header_guard</span><span class="p">.</span><span class="k">template</span> <span class="n">AsMut</span><span class="o">&lt;</span><span class="n">ExtendibleHTableHeaderPage</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">header_page</span><span class="o">-&gt;</span><span class="n">Init</span><span class="p">(</span><span class="n">header_max_depth_</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="getvalue"><strong><code>GetValue</code></strong></h3>
+<blockquote>
+<p>auto DiskExtendibleHashTable&lt;K, V, KC&gt;::GetValue(const K &amp;key, std::vector<V> *result, Transaction *transaction) const -&gt; bool</p>
+</blockquote>
+<ol>
+<li>从标头页开始搜索：利用<code>FetchPageRead</code>获取<code>header_guard</code>，同样的方式转换为<code>header_page</code>，用<code>Hash</code>函数处理key得到hash值，然后用<code>HashToDirectoryIndex</code>处理得到<code>dir_index</code>，即可找到目录页。这里就可以<code>Drop</code>掉<code>header_guard</code>了。</li>
+<li>若得到的目录页的<code>PageId</code>为INVALID_PAGE_ID，则返回false。否则获取该目录页，<code>HashToBucketIndex</code>得到桶的索引。接着等到成功获取到桶页面切不为INVALID_PAGE_ID的时候再<code>Drop</code>掉<code>dir_guard</code>。</li>
+<li>最后就可以在桶里找了，用桶的<code>LookUp</code>函数搜索，找到了就<code>push_back</code>到<code>result</code>中，<code>Drop</code>掉<code>bucket_guard</code>，返回true。没找到就返回false。</li>
+</ol>
+<h3 id="splitbucket"><strong><code>SplitBucket</code></strong></h3>
+<blockquote>
+<p>auto DiskExtendibleHashTable&lt;K, V, KC&gt;::SplitBucket(ExtendibleHTableDirectoryPage *directory, ExtendibleHTableBucketPage&lt;K, V, KC&gt; *bucket, uint32_t bucket_idx) -&gt; bool</p>
+</blockquote>
+<ol>
+<li>New一个新的页面作为新的桶页，并升级为<code>WritePageGuard</code>，如果得到的<code>PageId</code>为INVALID_PAGE_ID，说明分配失败，直接return false。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">WritePageGuard</span> <span class="n">split_bucket_guard</span> <span class="o">=</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">NewPageGuarded</span><span class="p">(</span><span class="o">&amp;</span><span class="n">split_page_id</span><span class="p">).</span><span class="n">UpgradeWrite</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>得到分裂的新桶page，执行<code>Init</code>，因为它就是传入的那个<code>bucket</code>（<strong>执行分裂前该桶已经增加过LD了</strong>）的兄弟，所以它在目录中的索引就是<code>GetSplitImageIndex(bucket_idx)</code>，LD也与之相同，所以目录需要对新桶执行<code>SetBucketPageId</code>和<code>SetLocalDepth</code>。</li>
+<li>由于桶的分裂，LD增加，使得之前存放的第一个桶里的内容需要拿出来<strong>重新分配</strong>到这两个桶里。用一个<code>vector</code>记录下第一个桶里的所有键值对，然后清空该桶，再根据每个键的最低有效位来选择放到哪个桶里。</li>
+</ol>
+<h3 id="insert"><strong><code>Insert</code></strong></h3>
+<blockquote>
+<p>auto DiskExtendibleHashTable&lt;K, V, KC&gt;::Insert(const K &amp;key, const V &amp;value, Transaction *transaction) -&gt; bool</p>
+</blockquote>
+<ol>
+<li>先执行<code>GetValue(key, &amp;v, transaction)</code>，若找到了，说明键已存在，直接返回false。</li>
+<li>同样从标头页开始找，区别就是这里用的是<code>FetchPageWrite</code>，因为涉及到写。通过<code>hash_key</code>在标头页中得到<code>dir_page_id</code>。</li>
+<li>如果<code>dir_page_id</code>等于INVALID_PAGE_ID，说明目录页不存在，需要新分配目录页，并初始化，我们另起一个函数<code>InsertToNewDirectory</code>来处理，在下面给出。否则，Drop掉header_guard，获取目录页，根据目录页和<code>hash_key</code>得到桶的<code>bucket_page_id</code>。因为目录页之后会写，不着急Drop。</li>
+<li>同理，如果<code>bucket_page_id</code>等于INVALID_PAGE_ID，另起一个函数<code>InsertToNewBucket</code>来处理。否则，拿到桶页，用桶页的<code>Insert</code>函数插入，如果成功就返回true。</li>
+<li>如果失败说明桶已满，需要<strong>分裂桶</strong>。先检查LD已经等于GD，如果是，再检查GD是否大于等于MD，如果不是，可以<code>IncrGlobalDepth</code>，如果也是，说明满满的了，分不了，返回false。然后就可以增加这个桶的LD了，同时增加它兄弟的LD(例如最开始图中的00和10，要加一起加)。</li>
+<li>执行到这里，就可以开始分裂了<code>SplitBucket</code>，分裂失败就返回false，否则Drop掉<code>bucket_guard</code>和<code>dir_guard</code>，然后递归<code>return Insert(..)</code>。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//  这里两个函数其实主要是在新建有效页，让对应的索引指向有效页面，最后还是要调用Insert来重新插入。 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">K</span><span class="p">,</span> <span class="k">typename</span> <span class="n">V</span><span class="p">,</span> <span class="k">typename</span> <span class="n">KC</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">DiskExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;::</span><span class="n">InsertToNewDirectory</span><span class="p">(</span><span class="n">ExtendibleHTableHeaderPage</span> <span class="o">*</span><span class="n">header</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">directory_idx</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                                             <span class="kt">uint32_t</span> <span class="n">hash</span><span class="p">,</span> <span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page_id_t</span> <span class="n">dir_page_id</span> <span class="o">=</span> <span class="n">INVALID_PAGE_ID</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// allocate a new directory page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">WritePageGuard</span> <span class="n">dir_guard</span> <span class="o">=</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">NewPageGuarded</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dir_page_id</span><span class="p">).</span><span class="n">UpgradeWrite</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">dir_page</span> <span class="o">=</span> <span class="n">dir_guard</span><span class="p">.</span><span class="n">AsMut</span><span class="o">&lt;</span><span class="n">ExtendibleHTableDirectoryPage</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">dir_page</span><span class="o">-&gt;</span><span class="n">Init</span><span class="p">(</span><span class="n">directory_max_depth_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">header</span><span class="o">-&gt;</span><span class="n">SetDirectoryPageId</span><span class="p">(</span><span class="n">directory_idx</span><span class="p">,</span> <span class="n">dir_page_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">bucket_idx</span> <span class="o">=</span> <span class="n">dir_page</span><span class="o">-&gt;</span><span class="n">HashToBucketIndex</span><span class="p">(</span><span class="n">hash</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nf">InsertToNewBucket</span><span class="p">(</span><span class="n">dir_page</span><span class="p">,</span> <span class="n">bucket_idx</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">K</span><span class="p">,</span> <span class="k">typename</span> <span class="n">V</span><span class="p">,</span> <span class="k">typename</span> <span class="n">KC</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">DiskExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;::</span><span class="n">InsertToNewBucket</span><span class="p">(</span><span class="n">ExtendibleHTableDirectoryPage</span> <span class="o">*</span><span class="n">directory</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">bucket_idx</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                                          <span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page_id_t</span> <span class="n">bucket_page_id</span> <span class="o">=</span> <span class="n">INVALID_PAGE_ID</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// allocate a new bucket page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">WritePageGuard</span> <span class="n">bucket_guard</span> <span class="o">=</span> <span class="n">bpm_</span><span class="o">-&gt;</span><span class="n">NewPageGuarded</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bucket_page_id</span><span class="p">).</span><span class="n">UpgradeWrite</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">bucket_page</span> <span class="o">=</span> <span class="n">bucket_guard</span><span class="p">.</span><span class="n">AsMut</span><span class="o">&lt;</span><span class="n">ExtendibleHTableBucketPage</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KC</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">bucket_page</span><span class="o">-&gt;</span><span class="n">Init</span><span class="p">(</span><span class="n">bucket_max_size_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">directory</span><span class="o">-&gt;</span><span class="n">SetBucketPageId</span><span class="p">(</span><span class="n">bucket_idx</span><span class="p">,</span> <span class="n">bucket_page_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">bucket_page</span><span class="o">-&gt;</span><span class="n">Insert</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">cmp_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="remove"><strong><code>Remove</code></strong></h3>
+<blockquote>
+<p>auto DiskExtendibleHashTable&lt;K, V, KC&gt;::Remove(const K &amp;key, Transaction *transaction) -&gt; bool</p>
+</blockquote>
+<ol>
+<li>同样用<code>FetchPageWrite</code>获取标头页，然后根据<code>hash_key</code>得到目录页的<code>dir_page_id</code>，<code>Drop</code>掉<code>header_guard</code>。如果得到的是INVALID_PAGE_ID，说明目录页不存在，直接return false。</li>
+<li>一样的操作得到桶页，如果桶页<code>PageId</code>为INVALID_PAGE_ID，直接return false。否则用桶页执行<code>Remove</code>，此时<code>Drop</code>掉<code>bucket_guard</code>。如果Remove失败，返回false。</li>
+<li>如果<code>Remove</code>成功，开始检测是否需要合并。一个大循环<code>while(LD &gt; 0)</code>，内部先获取该桶的兄弟桶，然后判断<strong>如果俩兄弟LD不一样 or 两个都不是空桶，直接<code>break</code>出来</strong>。否则，这轮循环需要合并：<code>bpm_-&gt;DeletePage</code>掉那个空桶，LD减1，更新目录。</li>
+<li>上一个循环结束后，合并完成。这里再一个循环，判断是否<code>CanShrink()</code>，如果可以就直接目录<code>DecrGlobalDepth()</code>，直到不能缩为止。<code>Drop</code>掉<code>dir_guard</code>。返回true。</li>
+</ol>
+<h2 id="concurrency-control">Concurrency Control</h2>
+<p>多线程并发控制。注意实现过程中<code>Fetch</code>和<code>Drop</code>的时机。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/cmu_project2.jpg"
+        data-srcset="./pics/cmu_project2.jpg, ./pics/cmu_project2.jpg 1.5x, ./pics/cmu_project2.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/cmu_project2.jpg"
+        title="score" /></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-01-14</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/cmu15445-extendible_hash_index/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/" data-title="Cmu15445 Extendible Hash Index"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/" data-title="Cmu15445 Extendible Hash Index"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/" data-title="Cmu15445 Extendible Hash Index"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/" data-title="Cmu15445 Extendible Hash Index"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/cmu15445-buffer_pool/" class="prev" rel="prev" title="Cmu15445 Buffer Pool"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Cmu15445 Buffer Pool</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.140.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2022 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":50},"comment":{}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
