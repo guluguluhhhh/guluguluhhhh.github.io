@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Cmu15445 Query Execution - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="https://guluguluhhhh.github.io/cmu15445-query_execution/">
+  <meta property="og:site_name" content="华子的博客">
+  <meta property="og:title" content="Cmu15445 Query Execution">
+  <meta property="og:description" content="Query Execution 在这次项目中，将实现允许 BusTub 执行查询的组件。具体是创建执行 SQL 查询的运算符执行程序，并实施优化器规则来转换查询计划。
+BusTub的架构如下：">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-01-15T10:45:30+08:00">
+    <meta property="article:modified_time" content="2025-01-15T10:45:30+08:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Cmu15445 Query Execution">
+  <meta name="twitter:description" content="Query Execution 在这次项目中，将实现允许 BusTub 执行查询的组件。具体是创建执行 SQL 查询的运算符执行程序，并实施优化器规则来转换查询计划。
+BusTub的架构如下：">
+<meta name="application-name" content="华子的博客">
+<meta name="apple-mobile-web-app-title" content="华子的博客"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://guluguluhhhh.github.io/cmu15445-query_execution/" /><link rel="prev" href="https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Cmu15445 Query Execution",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/guluguluhhhh.github.io\/cmu15445-query_execution\/"
+        },"genre": "posts","wordcount":  6803 ,
+        "url": "https:\/\/guluguluhhhh.github.io\/cmu15445-query_execution\/","datePublished": "2025-01-15T10:45:30+08:00","dateModified": "2025-01-15T10:45:30+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "huazi"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="华子的博客">华子的博客</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+             
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="华子的博客">华子的博客</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a>
+ 
+        </div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Cmu15445 Query Execution</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-01-15">2025-01-15</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;6803 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;14 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#注意">注意</a></li>
+    <li><a href="#access-method-executors">Access Method Executors</a>
+      <ul>
+        <li><a href="#seqscan">SeqScan</a></li>
+        <li><a href="#insert">Insert</a></li>
+        <li><a href="#update">Update</a></li>
+        <li><a href="#delete">Delete</a></li>
+        <li><a href="#indexscan">IndexScan</a></li>
+        <li><a href="#optimizing-seqscan-to-indexscan">Optimizing SeqScan to IndexScan</a></li>
+      </ul>
+    </li>
+    <li><a href="#aggregation--join-executors">Aggregation &amp; Join Executors</a>
+      <ul>
+        <li><a href="#aggregation">Aggregation</a></li>
+        <li><a href="#nestedloopjoin">NestedLoopJoin</a></li>
+      </ul>
+    </li>
+    <li><a href="#hashjoin-executor-and-optimization">HashJoin Executor and Optimization</a>
+      <ul>
+        <li><a href="#hashjoin">HashJoin</a></li>
+        <li><a href="#optimizing-nestedloopjoin-to-hashjoin">Optimizing NestedLoopJoin to HashJoin</a></li>
+      </ul>
+    </li>
+    <li><a href="#sort--limit-executors--window-functions--top-n-optimization">Sort + Limit Executors + Window Functions + Top-N Optimization</a>
+      <ul>
+        <li><a href="#sort">Sort</a></li>
+        <li><a href="#limit">Limit</a></li>
+        <li><a href="#top-n-optimization-rule">Top-N Optimization Rule</a></li>
+        <li><a href="#window-functions">Window Functions</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="query-execution">Query Execution</h1>
+<p>在这次项目中，将实现允许 BusTub 执行查询的组件。具体是创建执行 SQL 查询的运算符执行程序，并实施优化器规则来转换查询计划。</p>
+<p>BusTub的架构如下：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/sql_process.svg"
+        data-srcset="./pics/sql_process.svg, ./pics/sql_process.svg 1.5x, ./pics/sql_process.svg 2x"
+        data-sizes="auto"
+        alt="./pics/sql_process.svg"
+        title="architecture" /></p>
+<p>BusTub支持<code>EXPLAIN</code>命令打印查询的执行计划，比如：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/query_plan.jpg"
+        data-srcset="./pics/query_plan.jpg, ./pics/query_plan.jpg 1.5x, ./pics/query_plan.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/query_plan.jpg"
+        title="query_plan" /></p>
+<ol>
+<li><code>EXPLAIN</code>的结果中展示了查询处理层的转换过程。该语句首先有Parser和Binder处理，后者生成表示查询的抽象语法树（AST）。在这个例子中，查询由 __mock_table_1 上的 <code>BoundSelect</code> 表示，该 <code>BoundSelect</code> 将检索两列（<code>colA</code> 和 <code>colB</code>）。注意Binder 会自动将原始 SQL 查询中的 <code>*</code> 字符扩展到表中的实际列。</li>
+<li>接下来，Binder AST由Planner处理，将生成适当的查询计划。这个例子中，查询计划是一个包含两个节点的树，数据从叶子流向根。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/mock_scan.svg"
+        data-srcset="./pics/mock_scan.svg, ./pics/mock_scan.svg 1.5x, ./pics/mock_scan.svg 2x"
+        data-sizes="auto"
+        alt="./pics/mock_scan.svg"
+        title="mock_scan" /></li>
+<li>之后，优化器（Optimizer）将会优化查询计划，他会删除冗余的投影。</li>
+</ol>
+<p>接下里考虑一个更复杂的例子：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/another_query.jpg"
+        data-srcset="./pics/another_query.jpg, ./pics/another_query.jpg 1.5x, ./pics/another_query.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/another_query.jpg"
+        title="complex_query" />
+这里经过优化器优化后的查询计划为：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/more_complex_example.svg"
+        data-srcset="./pics/more_complex_example.svg, ./pics/more_complex_example.svg 1.5x, ./pics/more_complex_example.svg 2x"
+        data-sizes="auto"
+        alt="./pics/more_complex_example.svg"
+        title="complex_query_plan" /></p>
+<h2 id="注意">注意</h2>
+<ul>
+<li>在开始之前，先对<code>System Catalog</code>有一个了解。数据库维护一个<strong>内部目录</strong>来跟踪关于数据库的元数据。在本项目中，你将与系统编目交互，以<strong>查询有关表、索引及其架构的信息</strong>。</li>
+</ul>
+<div align="center">
+    <img src="./pics/catlog.jpg" alt="catlog" style="width: 85%; height: auto;"> 
+</div>
+<ul>
+<li>
+<p>对于表修改执行器（<code>InsertExecutor</code>、<code>UpdateExecutor</code>和<code>DeleteExecutor</code>），必须修改操作所针对的表的所有索引。你会发现<code>Catalog：：GetTableIndexes（）</code>函数可以查询为特定表定义的所有索引。一旦为每个表的索引创建了<code>IndexInfo</code>实例，就可以对基础索引结构调用索引修改操作。在这个项目中，将使用你在项目#2中实现的哈希表索引作为所有索引操作的底层数据结构。</p>
+</li>
+<li>
+<p>BusTub优化器是一个<strong>基于规则</strong>的优化器。大多数优化器规则以自底向上的方式构造优化计划。由于查询计划具有此树结构，因此在将优化器规则应用于当前计划节点之前，需要首先将规则<strong>递归地应用于其子节点</strong>。在每个计划节点，你应确定源计划结构是否与你尝试优化的计划结构匹配，然后检查该计划中的属性，以查看是否可以将其优化为目标优化计划结构。（<strong>仓库中已经提供了几个优化器规则的实现，提前看一下作为参考。</strong>）</p>
+</li>
+</ul>
+<h2 id="access-method-executors">Access Method Executors</h2>
+<p>此次任务，将要实现对存储系统中的表进行读取和写入的执行程序,
+下面将依次介绍每一个执行程序。</p>
+<h3 id="seqscan">SeqScan</h3>
+<p><code>SeqScanPlanNode</code> 可以使用 <code>SELECT * FROM table</code> 语句进行规划。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/seqscan.jpg"
+        data-srcset="./pics/seqscan.jpg, ./pics/seqscan.jpg 1.5x, ./pics/seqscan.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/seqscan.jpg"
+        title="seqscan" />
+<code>SeqScanExecutor</code> 迭代一个表，并一次返回一个 Tuples。</p>
+<blockquote>
+<p>Hint:</p>
+<ul>
+<li>不要输出在 <code>TableHeap</code> 中删除的元组。检查每个元组对应 <code>TupleMeta</code> 的 <code>is_deleted_</code> 字段。</li>
+<li>顺序扫描的输出是每个匹配的元组及其原始记录标识符 （<code>RID</code>） 的副本。</li>
+</ul>
+</blockquote>
+<ol>
+<li>构造函数中能赋值的赋值。**<code>Init()</code>**中获取<code>table_heap</code>（table的<code>oid</code>在<code>plan_</code>中），用<code>table_heap</code>的<code>MakeIterator()</code>创建迭代器，用迭代器遍历，记录下所有的<code>RID</code>。</li>
+<li><strong><code>Next(Tuple *tuple, RID *rid)</code></strong>。遍历记录好的RID们，对应的tuple本身和tuplemeta都可以通过table_heap获取，若meta中显示没被删除，则赋值给参数中的<em>tuple和</em>rid作为返回值。</li>
+<li>循环的判断条件注意要加上filter评估的结果转换为bool类型，若是最后一个rid也过去了就return false，否则return true。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">meta</span><span class="p">.</span><span class="n">is_deleted_</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">           <span class="p">(</span><span class="n">plan_</span><span class="o">-&gt;</span><span class="n">filter_predicate_</span> <span class="o">!=</span> <span class="k">nullptr</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">            <span class="o">!</span><span class="n">plan_</span><span class="o">-&gt;</span><span class="n">filter_predicate_</span>
+</span></span><span class="line"><span class="cl">                 <span class="o">-&gt;</span><span class="n">Evaluate</span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span> <span class="n">GetExecutorContext</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetCatalog</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetTable</span><span class="p">(</span><span class="n">plan_</span><span class="o">-&gt;</span><span class="n">GetTableOid</span><span class="p">())</span><span class="o">-&gt;</span><span class="n">schema_</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                 <span class="p">.</span><span class="n">GetAs</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">()));</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="insert">Insert</h3>
+<p>可以使用 <code>INSERT</code> 语句来规划 <code>InsertPlanNode</code>。请注意，你需要使用单引号来指定 <code>VARCHAR</code>值。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/insert.jpg"
+        data-srcset="./pics/insert.jpg, ./pics/insert.jpg 1.5x, ./pics/insert.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/insert.jpg"
+        title="insert" /></p>
+<blockquote>
+<p><code>InsertExecutor</code>将Tuples插入表中并更新受影响的索引。它只有一个子项就是生成要插入到表中的值。<code>Planner</code>确保这些值与表有相同的架构。<code>Executor</code> 将生成一个整数类型的 Tuples 作为输出，指示已插入到表中的行数。如果有与之关联的索引，请记住在插入表时更新索引。</p>
+</blockquote>
+<ol>
+<li><strong><code>Init()</code></strong>，先对<code>child_executor_</code>执行初始化，然后将<code>has_isnerted_</code>设置为false，来避免<strong>halloween problem</strong>。（包括后面的执行器也都需要这一步）</li>
+<li><strong><code>Next(Tuple *tuple, RID *rid)</code></strong>，先判断<code>has_inserted</code>如果为true，说明已经插入过了，直接返回false。否则置为true然后开始插入。获取需要用到的<code>table_info</code>、<code>schema</code>、<code>indexes</code>，并初始化一个<code>count</code>来记录插入行数。</li>
+<li>从子执行器<code>child_executor_ </code>中逐个取出元组并插入到表中，同时更新所有的索引。利用<code>InsertTuple</code>返回得到的<code>new_rid</code>，遍历<code>indexes</code>中的每个索引类型，先用<code>tuple-&gt;KeyFromTuple</code>拿到<code>key</code>，然后用<code>index_-&gt;InsertEntry</code>更新索引。</li>
+<li>根据要求，用count构造一个tuple返回。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Value</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{{</span><span class="n">TypeId</span><span class="o">::</span><span class="n">INTEGER</span><span class="p">,</span> <span class="n">count</span><span class="p">}};</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="n">tuple</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GetOutputSchema</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="update">Update</h3>
+<p><code>UpdatePlanNode</code> 可以使用 <code>UPDATE</code> 语句进行规划。它只有一个子项，其中包含表中要更新的记录。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/update.jpg"
+        data-srcset="./pics/update.jpg, ./pics/update.jpg 1.5x, ./pics/update.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/update.jpg"
+        title="update" /></p>
+<blockquote>
+<p><code>UpdateExecutor</code>修改指定表中的现有元组。执行器将生成一个整数类型的元组作为输出，指示有多少行被更新。请记住更新受更新影响的任何索引。<strong>要实现更新，首先删除受影响的元组，然后插入一个新的元组。</strong></p>
+</blockquote>
+<ol>
+<li>前两步与<code>insert</code>相同。每次从子执行器得到的元组，先删除再插入。</li>
+<li>删除的操作是<code>UpdateTupleMeta(TupleMeta{0, true}, *rid)</code>把<code>meta</code>更新一下就可以了，然后还要删除对应的索引，用<code>DeleteEntry</code>。</li>
+<li>再插入之前，先要计算表达式，得到更新后的值，然后再执行插入，与<code>insert</code>相同。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">    <span class="c1">// update: compute expressions
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Value</span><span class="o">&gt;</span> <span class="n">new_values</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="nl">expr</span> <span class="p">:</span> <span class="n">plan_</span><span class="o">-&gt;</span><span class="n">target_expressions_</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">new_values</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">expr</span><span class="o">-&gt;</span><span class="n">Evaluate</span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span> <span class="n">child_executor_</span><span class="o">-&gt;</span><span class="n">GetOutputSchema</span><span class="p">()));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="delete">Delete</h3>
+<p><code>DeletePlanNode</code>可以用一个SQL语句来规划。它正好有一个子节点，该子节点具有要从表中删除的记录。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/delete.jpg"
+        data-srcset="./pics/delete.jpg, ./pics/delete.jpg 1.5x, ./pics/delete.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/delete.jpg"
+        title="delete" /></p>
+<blockquote>
+<p><code>DeleteExcutor</code>应该生成一个整数输出，表示从表中删除的行数。它还需要更新任何受影响的索引。<strong>要删除一个元组，你需要从子执行器获取一个<code>RID</code>，并更新该元组对应的<code>TupleMeta</code>的<code>is_deleted_field</code></strong>。</p>
+</blockquote>
+<ol>
+<li>同理update的删除部分的逻辑。</li>
+</ol>
+<h3 id="indexscan">IndexScan</h3>
+<p><code>IndexScanExecutor</code>使用散列索引进行点查找，以检索元组的<code>RID</code>。然后操作员使用这些RID在相应的表中检索它们的元组。然后它每次发出一个元组。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/indexscan.jpg"
+        data-srcset="./pics/indexscan.jpg, ./pics/indexscan.jpg 1.5x, ./pics/indexscan.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/indexscan.jpg"
+        title="indexscan" />
+计划中索引对象的类型在此项目中将始终为 <code>HashTableIndexForTwoIntegerColumn</code> 。你可以安全地将其转换并存储在executor对象中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">htable_</span> <span class="o">=</span> <span class="k">dynamic_cast</span><span class="o">&lt;</span><span class="n">HashTableIndexForTwoIntegerColumn</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">index_info_</span><span class="o">-&gt;</span><span class="n">index_</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>你可以使用散列索引进行点查找，从表堆中查找元组，并根据谓词输出正确的元组。BusTub仅支持具有单个唯一整数列的索引。我们的测试用例不会包含重复的键。因此，点查找只返回一个元组，如果它存在。不要发出已删除的元组。</p>
+</blockquote>
+<ol>
+<li>**<code>Init()</code>**的时候，用上面说的，获取<code>htable_</code>存储在executor中。</li>
+<li><strong><code>Next()</code></strong>：利用<code>htable_</code>的<code>ScanKey</code>方法搜索，若返回结果为空，说明没有这个索引，直接返回false，否则从<code>table_heap</code>中拿到这个元组查看<code>meta</code>中的<code>is_deleted_</code>，若没被删除就正常返回。</li>
+</ol>
+<h3 id="optimizing-seqscan-to-indexscan">Optimizing SeqScan to IndexScan</h3>
+<blockquote>
+<p>当我们查询索引列时，使用<code>IndexScan</code>将显著提高查找性能。为此，我们需要将<strong>过滤器下推到扫描器中</strong>，以便我们知道在索引中查找的键。然后我们可以<strong>直接通过索引检索值</strong>，而不是进行全表扫描或索引扫描。</p>
+</blockquote>
+<p>这里需要修改优化器，以便在可能的情况下将<code>SeqScanPlanNode</code>转换为<code>IndexScanPlanNode</code>。如执行<code>bustub&gt; EXPLAIN (o) SELECT * FROM t1 WHERE v1 = 1;</code>，不应用MergeFilterScan和SeqScan as IndexScan优化器规则，计划可能如下所示：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/seq_to_index_before.jpg"
+        data-srcset="./pics/seq_to_index_before.jpg, ./pics/seq_to_index_before.jpg 1.5x, ./pics/seq_to_index_before.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/seq_to_index_before.jpg"
+        title="seqtoindex_before" /></p>
+<p>在应用MergeFilterScan和SeqScan as IndexScan优化器规则之后，我们<strong>可以只做一个快速的索引查找，而不是迭代整个表</strong>。生成的计划如下所示：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/seq_to_index_after.jpg"
+        data-srcset="./pics/seq_to_index_after.jpg, ./pics/seq_to_index_after.jpg 1.5x, ./pics/seq_to_index_after.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/seq_to_index_after.jpg"
+        title="seqtoindex_after" /></p>
+<ol>
+<li>执行之前，递归的优化子节点。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="nl">child</span> <span class="p">:</span> <span class="n">plan</span><span class="o">-&gt;</span><span class="n">GetChildren</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">optimized_children</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">OptimizeSeqScanAsIndexScan</span><span class="p">(</span><span class="n">child</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">optimized_plan</span> <span class="o">=</span> <span class="n">plan</span><span class="o">-&gt;</span><span class="n">CloneWithChildren</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">optimized_children</span><span class="p">));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>如果<code>optimized_plan-&gt;GetType()</code>等于<code>PlanType::SeqScan</code>，开始执行优化。获取计划的谓词，如果谓词为空仍然执行顺序扫描。</li>
+<li>判断其是否为条件谓词中的等值条件<code>ComparisonType::Equal</code>，只有等值条件这里才转化为索引扫描。</li>
+<li>根据谓词的列，获取索引信息<code>col_index</code>。遍历<code>indexes</code>，如果<code>index_-&gt;GetKeyAttrs()</code>取出的列与<code>col_index</code>相同，表示存在相关索引，构建<code>IndexScanPlanNode</code>并用智能共享指针来管理，返回。</li>
+</ol>
+<h2 id="aggregation--join-executors">Aggregation &amp; Join Executors</h2>
+<h3 id="aggregation">Aggregation</h3>
+<p><code>AggregationPlanNode</code>用于支持以下查询:
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/aggregation.jpg"
+        data-srcset="./pics/aggregation.jpg, ./pics/aggregation.jpg 1.5x, ./pics/aggregation.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/aggregation.jpg"
+        title="aggregation" />
+聚合执行器为每组输入计算聚合函数。它只有一个孩子。输出架构由<code>group-by</code>列和聚合列组成。实现聚合的一个常见策略是使用哈希表，并将<code>group-by</code>列作为键。</p>
+<blockquote>
+<p>在本项目中，你可以假设聚合哈希表适合内存。这意味着你不需要实现基于分区的多级策略，并且哈希表不需要由缓冲池页支持。我们提供了一个<code>SimpleAggregationHashTable</code>数据结构，它公开了一个内存中的哈希表（<code>std：：unordered_map</code>），但带有一个为计算聚合而设计的接口。这个类还公开了一个 <code>Iterator</code>类型，可用于遍历哈希表。你需要完成此类的<code>CombineAggregateValues</code>函数。</p>
+</blockquote>
+<p>Hint中提到，聚合是<em><strong>pipeline breakers</strong></em>，意味着在流水线中，聚合会中断数据流处理的过程。<strong>你会希望Init()中尽可能多地做准备工作，因为聚合往往需要看到所有相关的输入行才能正确地生成最终的结果。</strong></p>
+<ol start="0">
+<li>在实现<code>aggregation</code>之前需要先把哈希表完善一下。主要是<code>CombineAggregateValues</code>，将<strong>输入的聚合值与结果聚合值进行合并</strong>：遍历所有聚合表达式。根据不同的聚合类型（如计数、求和、最小值、最大值等），对每个聚合值进行相应的操作。</li>
+<li><strong><code>Init()</code></strong>：子执行器初始化，根据plan_的信息创建<code>SimpleAggregationHashTable</code>。<strong>遍历子执行器，将子执行器中的获取的数据插入到聚合哈希表中，不能在聚合执行器中完成，因为聚合执行器需要先从子执行器中获取所有数据，然后对这些数据进行分组和聚合操作，最后才能产生输出结果</strong>。具体来说，对每一个元组，执行<code>MakeAggregateKey</code>和<code>MakeAggregateValue</code>获取key和value，再<code>InsertCombine</code>到AHT里。</li>
+<li><strong><code>Next()</code></strong>：利用<code>Iterator</code>遍历AHT，如果有<code>groupby</code>的话就创建一个<code>vector&lt;Value&gt;</code>，先把<code>groupby</code>都依次添加进去，然后把聚合值依次添加进去，用这个<code>vector</code>构造tuple返回。<code>groupbys</code>为空，则生成一个初始的聚合值元组返回。</li>
+</ol>
+<h3 id="nestedloopjoin">NestedLoopJoin</h3>
+<p>默认情况下，DBMS将对所有连接操作使用<code>NestedLoopJoinPlanNode</code>。考虑以下示例查询：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/nestedloopjoin.jpg"
+        data-srcset="./pics/nestedloopjoin.jpg, ./pics/nestedloopjoin.jpg 1.5x, ./pics/nestedloopjoin.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/nestedloopjoin.jpg"
+        title="nest" /></p>
+<blockquote>
+<p>你需要使用类中的<strong>简单嵌套循环连接算法</strong>为<code>NestedLoopJoinExecutor</code>实现<strong>内部连接和左连接</strong>。该操作符的输出模式是左表中的所有列，后面跟着右表中的所有列。对于外部表中的每个元组，考虑内部表中的每个元组，如果<strong>满足连接谓词</strong>，则发出输出元组。</p>
+</blockquote>
+<p>左连接：返回左表中的所有记录，如果右表中没有匹配的记录，就用NULL表示。</p>
+<p>内部连接：仅返回两个表中有匹配的结果行。</p>
+<ol>
+<li><strong><code>Init()</code></strong>：初始化左右两个子执行器。</li>
+<li><strong><code>Next()</code></strong>：（这里解释左连接，内部连接类似）对于每个左表中的元组，遍历右表，用谓词的<code>EvaluateJoin</code>来判断是否匹配，若匹配成功，创建一个values，把左元组每一列的值添加进去，再把右元组每一列的值添加进去，用这个values构造一个tuple，返回。</li>
+<li>若是遍历完右表没找到，则用NULL代替右元组的值。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">ValueFactory</span><span class="o">::</span><span class="n">GetNullValueByType</span><span class="p">(</span><span class="n">right_executor_</span><span class="o">-&gt;</span><span class="n">GetOutputSchema</span><span class="p">().</span><span class="n">GetColumn</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="n">GetType</span><span class="p">());</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="hashjoin-executor-and-optimization">HashJoin Executor and Optimization</h2>
+<p>在开始此任务之前，你需要在任务#2中实现<code>NestedLoopJoinExecutor</code>。</p>
+<h3 id="hashjoin">HashJoin</h3>
+<p>如果一个查询包含一个两列之间有<strong>多个等价条件</strong>的连接（等价条件由AND分隔），DBMS可以使用<code>HashJoinPlanNode</code>。考虑以下示例查询：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/hashjoin.jpg"
+        data-srcset="./pics/hashjoin.jpg, ./pics/hashjoin.jpg 1.5x, ./pics/hashjoin.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/hashjoin.jpg"
+        title="hashjoin" /></p>
+<blockquote>
+<p>你需要使用类中的散列连接算法为<code>HashJoinExecutor</code>实现内部连接和左连接。与聚合一样，哈希连接的构建端是<em>pipeline breaker</em>。你需要一种方法来散列一个具有多个属性的元组，以构造一个唯一的键，参考<code>SimpleAggregationHashTable</code>。</p>
+</blockquote>
+<ol>
+<li><strong><code>Init()</code></strong>：初始化左右两个子执行器，遍历右表执行器，把每个元组插入到自己的哈希表里。</li>
+<li><strong><code>Next()</code></strong>：遍历左表执行器，对每个元组，通过左表的<code>key</code>，在哈希表<code>GetValue</code>到所有右表中匹配的元组，然后用和<code>NestedLoopJoin</code>中相同的操作构造tuple并返回。</li>
+</ol>
+<h3 id="optimizing-nestedloopjoin-to-hashjoin">Optimizing NestedLoopJoin to HashJoin</h3>
+<p><strong>哈希连接</strong>通常比<strong>嵌套循环连接</strong>产生更好的性能。当连接谓词是<strong>两列之间的几个等价条件的合取</strong>时，可以使用哈希连接算法。对于这个项目，你应该能够处理不同数量的由AND连接的等价条件。</p>
+<p>考虑这个例子：<code>bustub&gt; EXPLAIN (o) SELECT * FROM test_1 t1, test_2 t2 WHERE t1.colA = t2.colA AND t1.colB = t2.colC;</code>
+如果不应用<code>NLJAsHashJoin</code>优化器规则，计划可能如下所示：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/nest_to_hash_before.jpg"
+        data-srcset="./pics/nest_to_hash_before.jpg, ./pics/nest_to_hash_before.jpg 1.5x, ./pics/nest_to_hash_before.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/nest_to_hash_before.jpg"
+        title="./pics/nest_to_hash_before.jpg" />
+应用<code>NLJAsHashJoin</code>优化器规则后，将从<code>NestedLoopJoinPlanNode</code>中的单个连接谓词中提取左连接键表达式和右连接键表达式。生成的计划如下所示：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/nest_to_hash_after.jpg"
+        data-srcset="./pics/nest_to_hash_after.jpg, ./pics/nest_to_hash_after.jpg 1.5x, ./pics/nest_to_hash_after.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/nest_to_hash_after.jpg"
+        title="./pics/nest_to_hash_after.jpg" /></p>
+<ol>
+<li>先写一个单独的函数用来解析<code>and</code>表达式，并提取出左右连接键表达式：如果逻辑表达式是<code>and</code>则<strong>递归</strong>解析两边的表达式。接下来判断是否是=表达式，<strong>用GetTupleIdx()区分哪个列属于哪个表后，将其添加到对应的键表达式中。</strong></li>
+<li>开始实现<code>OptimizeNLJAsHashJoin</code>，与之前优化器一样先对子执行器进行优化。然后检查当前<code>plan_</code>的类型是不是<code>PlanType::NestedLoopJoin</code>，是的话开始优化：获取谓词，用刚才的函数提取左右两侧键表达式，用得到的结果创建一个新的<code>HashJoinPlanNode</code>返回。</li>
+</ol>
+<h2 id="sort--limit-executors--window-functions--top-n-optimization">Sort + Limit Executors + Window Functions + Top-N Optimization</h2>
+<p>在开始此任务之前，您需要在任务#1中实现<code>IndexScanExecutor</code>。如果表上有索引，查询处理层将自动选择它进行排序。在其他情况下，您需要一个特殊的排序执行器来完成此操作。</p>
+<h3 id="sort">Sort</h3>
+<p>除了<code>ORDERBY</code>属性与索引键匹配的情况外，BusTub将对所有<code>ORDERBY</code>运算符使用<code>SortPlanNode</code>。</p>
+<blockquote>
+<p>此计划节点不会更改<code>schema</code>（即输出与输入<code>schema</code>相同）。您可以从<code>order_bys</code>中提取排序键，然后使用<code>std::sort</code>和自定义比较器对子对象中的所有元组进行排序。您可以假设表中的所有条目都可以容纳在内存中。</p>
+</blockquote>
+<ol>
+<li><strong><code>Init()</code></strong>：初始化子执行器，并创建一个Vector<Tuple>来子执行器输出的元组，使用<code>std::sort</code>排序。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">sort</span><span class="p">(</span><span class="n">tuples_</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">tuples_</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">Comparator</span><span class="p">(</span><span class="o">&amp;</span><span class="n">GetOutputSchema</span><span class="p">(),</span> <span class="n">plan_</span><span class="o">-&gt;</span><span class="n">GetOrderBy</span><span class="p">()));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li><strong><code>Next()</code></strong>：依次输出排序后的元组。</li>
+</ol>
+<h3 id="limit">Limit</h3>
+<blockquote>
+<p><code>LimitExecutor</code>约束其子执行器的输出元组的数量。如果其子执行器生成的元组数量小于计划节点中指定的限制，则此执行器无效，并生成它接收的所有元组。</p>
+</blockquote>
+<ol>
+<li><strong><code>Next()</code></strong>：每次输出的时候计数，到达<code>plan_-&gt;GetLimit()</code>后返回false。</li>
+</ol>
+<h3 id="top-n-optimization-rule">Top-N Optimization Rule</h3>
+<p>修改BusTub的优化器以支持转换前N个查询。考虑以下查询：</p>
+<p><code>EXPLAIN SELECT * FROM __mock_table_1 ORDER BY colA LIMIT 10;</code></p>
+<p>默认情况下，BusTub将通过以下方式执行此查询：（1）对表中的所有数据进行排序（2）获取前10个元素。<strong>这显然是低效的，因为查询只需要最小的值</strong>。<strong>一个更聪明的方法是动态地跟踪到目前为止最小的10个元素</strong>。这就是BusTub的<code>TopNExecutor</code>所做的。想想什么数据结构可以用来跟踪前n个元素，<strong>小顶堆和大顶堆！</strong>。</p>
+<p>所以需要修改优化器，以支持将带有<code>ORDER BY</code> + <code>LIMIT</code>子句的查询转换为使用<code>TopNEutor</code>。</p>
+<ol>
+<li><strong><code>Init()</code></strong>：用优先队列创建一个堆。遍历子执行器的元组，插入堆，如果当前堆的大小超过N，则弹出一个，最后保留的即为前N个，O(n*logN)</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">// 使用优先队列存储topN，升序用大顶堆（每次pop出来大的），降序用小顶堆
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 元素为Tuple，底层用vector存储，比较器为Comparator
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">std</span><span class="o">::</span><span class="n">priority_queue</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Comparator</span><span class="o">&gt;</span> <span class="n">heap</span><span class="p">(</span><span class="n">Comparator</span><span class="p">(</span><span class="o">&amp;</span><span class="n">GetOutputSchema</span><span class="p">(),</span> <span class="n">plan_</span><span class="o">-&gt;</span><span class="n">GetOrderBy</span><span class="p">()));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>对于优化器<code>OptimizeSortLimitAsTopN</code>，先判断如果<code>plan_</code>的类型是<code>Limit</code>，将其转换为<code>LimitPlanNode</code>来获取<code>limit_</code>的值，并获取<code>plan_</code>的第0个孩子，如果孩子的类型是<code>Sort</code>，就创建一个<code>TopNPlanNode</code>返回。</li>
+</ol>
+<h3 id="window-functions">Window Functions</h3>
+<blockquote>
+<p>一般来说，窗口函数有三个部分：<code>partition by</code>、<code>order by</code>和<code>window frames</code>。这三个功能都是可选的，因此这些功能的多种组合使窗口功能一开始令人生畏。然而，窗口函数的概念模型有助于使其更容易理解。概念模型如下：* 根据<code>partition by</code>子句中的条件分割数据。* 然后，在每个分区中，按<code>order by</code>子句排序。* 然后，在每个分区（现在已排序）中，遍历每个元组。对于每个元组，我们计算该元组的框架的边界条件。每个帧都有一个开始和结束（由窗口帧的子句指定）。窗口函数是在每个帧中的元组上计算的，我们输出在每个帧中计算的结果。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/window_function_execution_model.jpg"
+        data-srcset="./pics/window_function_execution_model.jpg, ./pics/window_function_execution_model.jpg 1.5x, ./pics/window_function_execution_model.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/window_function_execution_model.jpg"
+        title="./pics/window_function_execution_model.jpg" /></p>
+</blockquote>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/cmu_project3.jpg"
+        data-srcset="./pics/cmu_project3.jpg, ./pics/cmu_project3.jpg 1.5x, ./pics/cmu_project3.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/cmu_project3.jpg"
+        title="./pics/cmu_project3.jpg" /></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-01-15</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/cmu15445-query_execution/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://guluguluhhhh.github.io/cmu15445-query_execution/" data-title="Cmu15445 Query Execution"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://guluguluhhhh.github.io/cmu15445-query_execution/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://guluguluhhhh.github.io/cmu15445-query_execution/" data-title="Cmu15445 Query Execution"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="https://guluguluhhhh.github.io/cmu15445-query_execution/" data-title="Cmu15445 Query Execution"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="https://guluguluhhhh.github.io/cmu15445-query_execution/" data-title="Cmu15445 Query Execution"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/cmu15445-extendible_hash_index/" class="prev" rel="prev" title="Cmu15445 Extendible Hash Index"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Cmu15445 Extendible Hash Index</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.140.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2022 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":50},"comment":{}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

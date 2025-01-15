@@ -3,9 +3,20 @@
         <title>华子的博客</title>
         <link>https://guluguluhhhh.github.io/</link>
         <description>华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 14 Jan 2025 12:41:00 &#43;0800</lastBuildDate>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 15 Jan 2025 10:45:30 &#43;0800</lastBuildDate>
             <atom:link href="https://guluguluhhhh.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>Cmu15445 Query Execution</title>
+    <link>https://guluguluhhhh.github.io/cmu15445-query_execution/</link>
+    <pubDate>Wed, 15 Jan 2025 10:45:30 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>https://guluguluhhhh.github.io/cmu15445-query_execution/</guid>
+    <description><![CDATA[<h1 id="query-execution">Query Execution</h1>
+<p>在这次项目中，将实现允许 BusTub 执行查询的组件。具体是创建执行 SQL 查询的运算符执行程序，并实施优化器规则来转换查询计划。</p>
+<p>BusTub的架构如下：
+</p>]]></description>
+</item>
+<item>
     <title>Cmu15445 Extendible Hash Index</title>
     <link>https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/</link>
     <pubDate>Tue, 14 Jan 2025 12:41:00 &#43;0800</pubDate>
