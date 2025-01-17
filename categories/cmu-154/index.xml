@@ -1,0 +1,17 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>CMU 154 - Category - 华子的博客</title>
+        <link>http://localhost:1313/categories/cmu-154/</link>
+        <description>CMU 154 - Category - 华子的博客</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 14 Jan 2025 12:41:00 &#43;0800</lastBuildDate><atom:link href="http://localhost:1313/categories/cmu-154/" rel="self" type="application/rss+xml" /><item>
+    <title>Cmu15445 Extendible Hash Index</title>
+    <link>http://localhost:1313/cmu15445-extendible_hash_index/</link>
+    <pubDate>Tue, 14 Jan 2025 12:41:00 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>http://localhost:1313/cmu15445-extendible_hash_index/</guid>
+    <description><![CDATA[<h1 id="extendible-hash-index">Extendible Hash Index</h1>
+<p>在此编程项目中，将使用<strong>可扩展哈希</strong>的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。</p>
+<p>下图显示了一个可扩展哈希表，其中<code>header</code>页最大深度为 2，<code>directory</code>页最大深度为 2，存储<code>bucket</code>页最多包含两个条目。值被省略，并且<strong>键的哈希值</strong>显示在<code>bucket</code>页面中，而不是键本身。</p>]]></description>
+</item>
+</channel>
+</rss>

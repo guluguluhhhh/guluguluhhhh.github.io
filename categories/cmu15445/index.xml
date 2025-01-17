@@ -1,0 +1,26 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>CMU15445 - Category - 华子的博客</title>
+        <link>http://localhost:1313/categories/cmu15445/</link>
+        <description>CMU15445 - Category - 华子的博客</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 14 Jan 2025 12:41:00 &#43;0800</lastBuildDate><atom:link href="http://localhost:1313/categories/cmu15445/" rel="self" type="application/rss+xml" /><item>
+    <title>Cmu15445 Extendible Hash Index</title>
+    <link>http://localhost:1313/cmu15445-extendible_hash_index/</link>
+    <pubDate>Tue, 14 Jan 2025 12:41:00 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>http://localhost:1313/cmu15445-extendible_hash_index/</guid>
+    <description><![CDATA[<h1 id="extendible-hash-index">Extendible Hash Index</h1>
+<p>在此编程项目中，将使用<strong>可扩展哈希</strong>的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。</p>
+<p>下图显示了一个可扩展哈希表，其中<code>header</code>页最大深度为 2，<code>directory</code>页最大深度为 2，存储<code>bucket</code>页最多包含两个条目。值被省略，并且<strong>键的哈希值</strong>显示在<code>bucket</code>页面中，而不是键本身。</p>]]></description>
+</item>
+<item>
+    <title>Cmu15445 Buffer Pool</title>
+    <link>http://localhost:1313/cmu15445-buffer_pool/</link>
+    <pubDate>Mon, 13 Jan 2025 16:49:33 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>http://localhost:1313/cmu15445-buffer_pool/</guid>
+    <description><![CDATA[<h1 id="buffer-pool">Buffer Pool</h1>
+<p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p>]]></description>
+</item>
+</channel>
+</rss>
