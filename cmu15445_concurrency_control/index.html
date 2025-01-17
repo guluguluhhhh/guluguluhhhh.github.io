@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Cmu15445 Concurrency Control - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="https://guluguluhhhh.github.io/cmu15445_concurrency_control/">
+  <meta property="og:site_name" content="华子的博客">
+  <meta property="og:title" content="Cmu15445 Concurrency Control">
+  <meta property="og:description" content="Concurrency Control 在这个项目中，你将通过实现乐观多版本并发控制（MVOCC）来为BusTub添加事务支持。
+Timestamps Timestamp Allocation 当一个事务开始时，它将被分配一个读时间戳，这是最近提交的事务的提交时间戳。在事务提交时，它将被分配一个单调递增的提交时间戳。读时间戳确定事务可以读取哪些数据，而提交时间戳确定事务的序列化顺序。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-01-16T13:35:16+08:00">
+    <meta property="article:modified_time" content="2025-01-16T13:35:16+08:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Cmu15445 Concurrency Control">
+  <meta name="twitter:description" content="Concurrency Control 在这个项目中，你将通过实现乐观多版本并发控制（MVOCC）来为BusTub添加事务支持。
+Timestamps Timestamp Allocation 当一个事务开始时，它将被分配一个读时间戳，这是最近提交的事务的提交时间戳。在事务提交时，它将被分配一个单调递增的提交时间戳。读时间戳确定事务可以读取哪些数据，而提交时间戳确定事务的序列化顺序。">
+<meta name="application-name" content="华子的博客">
+<meta name="apple-mobile-web-app-title" content="华子的博客"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://guluguluhhhh.github.io/cmu15445_concurrency_control/" /><link rel="prev" href="https://guluguluhhhh.github.io/cmu15445-query_execution/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Cmu15445 Concurrency Control",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/guluguluhhhh.github.io\/cmu15445_concurrency_control\/"
+        },"genre": "posts","wordcount":  5089 ,
+        "url": "https:\/\/guluguluhhhh.github.io\/cmu15445_concurrency_control\/","datePublished": "2025-01-16T13:35:16+08:00","dateModified": "2025-01-16T13:35:16+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "huazi"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="华子的博客">华子的博客</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+             
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="华子的博客">华子的博客</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a>
+ 
+        </div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Cmu15445 Concurrency Control</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-01-16">2025-01-16</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;5089 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;11 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#timestamps">Timestamps</a>
+      <ul>
+        <li><a href="#timestamp-allocation">Timestamp Allocation</a></li>
+        <li><a href="#watermark">Watermark</a></li>
+      </ul>
+    </li>
+    <li><a href="#storage-format-and-sequential-scan">Storage Format and Sequential Scan</a>
+      <ul>
+        <li><a href="#tuple-reconstruction">Tuple Reconstruction</a></li>
+        <li><a href="#sequential-scan--tuple-retrieval">Sequential Scan / Tuple Retrieval</a></li>
+      </ul>
+    </li>
+    <li><a href="#mvcc-executors">MVCC Executors</a>
+      <ul>
+        <li><a href="#insert-executor">Insert Executor</a></li>
+        <li><a href="#commit">Commit</a></li>
+        <li><a href="#update-and-delete-executor">Update and Delete Executor</a>
+          <ul>
+            <li><a href="#delete">delete</a></li>
+            <li><a href="#update">update</a></li>
+          </ul>
+        </li>
+        <li><a href="#stop-the-world-garbage-collection">Stop-the-world Garbage Collection</a></li>
+      </ul>
+    </li>
+    <li><a href="#primary-key-index">Primary Key Index</a>
+      <ul>
+        <li><a href="#index-scan-deletes-and-updates">Index Scan, Deletes and Updates</a>
+          <ul>
+            <li><a href="#index-scan">Index Scan</a></li>
+            <li><a href="#deletes-and-updates">Deletes and Updates</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="concurrency-control">Concurrency Control</h1>
+<p>在这个项目中，你将通过实现乐观多版本并发控制（MVOCC）来为BusTub添加事务支持。</p>
+<h2 id="timestamps">Timestamps</h2>
+<h3 id="timestamp-allocation">Timestamp Allocation</h3>
+<blockquote>
+<p>当一个事务开始时，它将被分配一个<strong>读时间戳</strong>，这是最近提交的事务的提交时间戳。在事务提交时，它将被分配一个单调递增的<strong>提交时间戳</strong>。<strong>读时间戳确定事务可以读取哪些数据，而提交时间戳确定事务的序列化顺序。</strong></p>
+</blockquote>
+<p>比如这个例子：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/1-1-ts.png"
+        data-srcset="./pics/1-1-ts.png, ./pics/1-1-ts.png 1.5x, ./pics/1-1-ts.png 2x"
+        data-sizes="auto"
+        alt="./pics/1-1-ts.png"
+        title="./pics/1-1-ts.png" />
+提交时间戳是一个逻辑计数器，每次提交事务时<strong>递增1</strong>。D3元组由提交时间戳为3的事务写入。</p>
+<p>如果我们有一个读时间戳 = 3的事务，在这个例子中它就可以看到A3，B3，C2和D3。如果读取时间戳= 2，则会看到A2，B1，C2。当事务开始时，读取时间戳将是最近提交的事务的时间戳，因此事务将能够看到在事务开始之前提交的所有内容。<strong>你无法读到未来的数据</strong>。</p>
+<ol>
+<li>在<code>TransactionManager::Begin</code>中设置一个事务的<code>read_ts_</code>为<code>last_commit_ts_</code>，使用c++原子变量<code>atomic</code>。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">txn_ref</span><span class="o">-&gt;</span><span class="n">read_ts_</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="n">last_commit_ts_</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>在<code>TransactionManager::Commit</code>中设置<code>commit_ts_</code>为<code>last_commit_ts_</code>+1，也使用c++原子变量<code>atomic</code>。然后<code>last_commit_ts_</code>自增1。</li>
+</ol>
+<h3 id="watermark">Watermark</h3>
+<blockquote>
+<p>水印是所有正在进行的事务中最低的读时间戳。实现用尽量少的时间复杂度。</p>
+</blockquote>
+<ol>
+<li><strong>定义一个map来存储每个读时间戳有多少个</strong>。</li>
+<li><code>Watermark::AddTxn</code>中把传入的读时间戳在<code>map</code>中加1，<code>map</code>里没有就设为1。<code>watermark_</code>设置为<code>map.begin()-&gt;first</code>。</li>
+<li><code>Watermark::RemoveTxn</code>中把传入的读时间戳在<code>map</code>中减1，如果减到0了就<code>erase</code>掉。如果<code>map</code>为不空就设置为<code>map.begin()-&gt;first</code>，为空就设置为<code>commit_ts_</code>。</li>
+</ol>
+<h2 id="storage-format-and-sequential-scan">Storage Format and Sequential Scan</h2>
+<p>BusTub将事务数据存储在三个地方：<strong>表堆、事务管理器和每个事务内部</strong>。表堆总是包含最新的数据，事务管理器“页面版本信息”存储指向下一次修改的指针，在每个事务中，我们以称为undo log的格式存储事务修改的元组。要在给定的读取时间戳检索元组，你需要</p>
+<ul>
+<li>获取所有修改（undo logs）</li>
+<li>将修改（&ldquo;undo&rdquo; the undo logs）应用于元组的最新版本以恢复元组的过去版本。</li>
+</ul>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/2-1-storage-format.png"
+        data-srcset="./pics/2-1-storage-format.png, ./pics/2-1-storage-format.png 1.5x, ./pics/2-1-storage-format.png 2x"
+        data-sizes="auto"
+        alt="./pics/2-1-storage-format.png"
+        title="./pics/2-1-storage-format.png" /></p>
+<h3 id="tuple-reconstruction">Tuple Reconstruction</h3>
+<blockquote>
+<p>在本任务中，你将需要实现元组重构算法。你需要实现<code>ReconstructTuple</code>函数。<code>ReconstructTuple</code>接受存储在表堆中的基本元组和基本元数据，以及按它们添加到系统的时间降序排列的撤销日志列表。<code>ReconstructTuple</code><strong>将始终应用提供给函数的所有修改，而无需查看元数据或撤消日志中的时间戳</strong>。</p>
+</blockquote>
+<p>下面介绍一个重建元组的例子：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/2-2-undo-log.png"
+        data-srcset="./pics/2-2-undo-log.png, ./pics/2-2-undo-log.png 1.5x, ./pics/2-2-undo-log.png 2x"
+        data-sizes="auto"
+        alt="./pics/2-2-undo-log.png"
+        title="./pics/2-2-undo-log.png" />
+<code>base tuples</code>总是包含完整的数据，但是在<code>undo logs</code>中只包含修改过的列。<code>modified_fields</code>是一个bool向量，其长度与表模式相同，设置为true的地方表示改字段被修改。日志中的的元组字段只包含修改过的字段。同时你需要考虑<code>is_delete</code>标志来处理元组被删除的情况。</p>
+<ol>
+<li>判断若最后一个日志<code>is_deleted_</code>为true，说明数据最后被删了，直接返回std::nullopt。或者如果日志为空，<code>base tuple</code>显示被删除，也返回std::nullopt。</li>
+<li>遍历<code>undo logs</code>：对每个撤销日志，检查<code>modified_fields_</code>，把所有true的地方，依次记录到一个新的<code>vector</code>cols后面。根据cols，用<code>CopySchema</code>方法构造修改元组的<code>schema</code>。</li>
+<li>按照<code>schema</code>的列顺序重构元组，对每个列，判断是否在cols中，如果在就用日志中<code>partial tuple</code>的值，否则就用<code>base tuple</code>的值。最终得到重建一个日志后的元组，直到遍历完所有日志。</li>
+</ol>
+<h3 id="sequential-scan--tuple-retrieval">Sequential Scan / Tuple Retrieval</h3>
+<blockquote>
+<p>在这个任务中，你需要重写Project #3中的顺序扫描执行器，以便支持基于事务的读取时间戳从过去检索数据。</p>
+</blockquote>
+<p>顺序扫描执行器扫描表堆，<strong>检索直到事务读取时间戳的撤销日志</strong>，然后<strong>重建</strong>将用作执行器输出的原始元组。在MVCC顺序扫描执行器中需要处理3种情况：</p>
+<ul>
+<li><em><strong>表堆中的元组是最新的数据</strong></em>。可以直接返回元组，如果元组已经被删除则跳过元组。</li>
+<li><em><strong>表堆中的元组包含当前事务的修改</strong></em>。在BusTub中，正常的有效ts范围是0到<code>TXN_START_ID - 1</code>。若是表堆中的元组被还未提交的事务修改，那么该元组的ts会设置为<code>TXN_START_ID + txn_human_readable_id</code>，将是一个非常大的数字。所以如果发现元组就是被当前事务修改的，应该直接返回给用户，否则恢复过去版本。</li>
+<li><em><strong>表堆中的元组被另一个未提交的事务修改，或者比事务读时间戳新</strong></em>。在这种情况下，你将需要<strong>重新配置版本链</strong>，以收集读取时间戳之后的所有撤消日志，并恢复元组的过去版本。</li>
+</ul>
+<p>举个例子，下面的示例中的<code>TXN_START_ID</code>将为<code>1000</code>。因此，<code>1009</code>指示元组包含<code>txn9</code>的未提交更新。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/2-3-seqscan.png"
+        data-srcset="./pics/2-3-seqscan.png, ./pics/2-3-seqscan.png 1.5x, ./pics/2-3-seqscan.png 2x"
+        data-sizes="auto"
+        alt="./pics/2-3-seqscan.png"
+        title="./pics/2-3-seqscan.png" />
+Txn9尚未提交，读取时间戳为3。在表格的txn 9中顺序扫描的结果将是：（A，9），（B，9），（C，2），（D，9）。</p>
+<p>考虑另一个读时间戳为4的事务，该事务的顺序扫描的结果将是：（A，3），（B，3），（C，4）。</p>
+<ol>
+<li>在原先seqscan基础上，判断如果是当前事务修改<code>meta.ts_ == txn_-&gt;GetTransactionId()</code>或者小于事务读取时间戳<code>meta.ts_ &lt;= txn_read_ts_</code>，即可直接返回。</li>
+<li>否则这个元组的数据要么是来自未来，要么是正在被另一个事务修改，我们需要重建该元组：获取第一个日志，若没有日志或者无效日志，则跳过，否则收集日志，知道时间戳小于等于事务读时间戳，然后重建元组。</li>
+</ol>
+<h2 id="mvcc-executors">MVCC Executors</h2>
+<p>在本节中，你将需要实现数据修改执行器，包括插入执行器、删除执行器和更新执行器。</p>
+<h3 id="insert-executor">Insert Executor</h3>
+<blockquote>
+<p>在这个项目中，你的<code>insert executor</code>实现应该与项目#3中的几乎相同。你可以简单地在表堆中创建一个新的元组。你需要正确地设置元组的元组元数据。<strong>表堆中的时间戳应该设置为事务临时时间戳</strong>。你还应该将RID添加到<strong>写入集</strong>。</p>
+</blockquote>
+<h3 id="commit">Commit</h3>
+<blockquote>
+<p>一次只允许一个事务进入<code>Commit</code>函数，你应该通过在事务管理器中使用<code>commit_mutex_</code>来确保这一点。在这个任务中，需要在事务管理器中用提交逻辑扩展你的<code>Commit</code>实现。</p>
+</blockquote>
+<ol>
+<li>获取commit锁，遍历写入集合，将<code>base tuples</code>的时间戳设置为提交时间戳。</li>
+<li>设置事务的提交状态并更新事务的提交时间戳和<code>last_committed_ts</code></li>
+</ol>
+<h3 id="update-and-delete-executor">Update and Delete Executor</h3>
+<blockquote>
+<p>在这个任务中，你需要实现生成撤消日志和更新表堆元组的逻辑。其中更新执行器将元组的新版本放入表堆中，删除执行器为表堆中的元组设置<code>is_delete</code>标志。</p>
+</blockquote>
+<p>在更新或删除元组之前，你需要检查<strong>写-写冲突</strong>。</p>
+<ul>
+<li>如果未提交的事务正在修改元组，则不允许其他事务修改它，如果它们这样做，则将出现写-写冲突，并且与前一个事务冲突的事务应该被中止。</li>
+<li>另一种写-写冲突情况是当事务A删除元组并提交，而另一个事务B在A之前开始并删除相同的元组（写入比读ts大的元组）。</li>
+</ul>
+<p>更新执行器应该实现为<em>pipeline breakers</em>：在写入任何更新之前，它应该首先扫描子执行器到本地缓冲区的所有元组。之后，它应该从本地缓冲区中提取元组，计算更新的元组，然后在表堆上执行更新。</p>
+<p>看这个例子：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/3-3-write-conflict.png"
+        data-srcset="./pics/3-3-write-conflict.png, ./pics/3-3-write-conflict.png 1.5x, ./pics/3-3-write-conflict.png 2x"
+        data-sizes="auto"
+        alt="./pics/3-3-write-conflict.png"
+        title="./pics/3-3-write-conflict.png" /></p>
+<ul>
+<li>
+<p>在情况（1）中，txn 10删除（A，2）元组并且还没有提交。Txn 9仍然可以读取元组（A，2）的旧版本，因为读取时间戳是3。在这种情况下，如果Txn 9需要更新/删除元组，则应该通过写-写冲突中止。</p>
+</li>
+<li>
+<p>在情况（2）中，如果任何其他事务尝试更新/删除该元组，则它们将被中止。</p>
+</li>
+<li>
+<p>在情况（3）中，存在将（C，2）更新为（C，4）的另一个事务，并且提交时间戳被设置为4。Txn 9可以读取元组（C，2）的旧版本，但是当更新/删除（C，4）元组时，它应该被中止，因为在事务读取时间戳之后发生了更新。</p>
+</li>
+</ul>
+<p>实现中还需要考虑<strong>自我修改</strong>，这应该在检查写-写冲突之前完成。如果一个元组已经被当前事务修改过，它可以自己更新/删除，你不应该把这看作是写-写冲突。如果元组是新插入的，则不需要创建撤消日志。否则，事务对于每个RID最多保留一个撤消日志。<strong>因此，如果一个事务更新一个元组两次，你需要更新之前的撤销日志/只更新表堆。</strong></p>
+<h4 id="delete">delete</h4>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/3-3-delete.png"
+        data-srcset="./pics/3-3-delete.png, ./pics/3-3-delete.png 1.5x, ./pics/3-3-delete.png 2x"
+        data-sizes="auto"
+        alt="./pics/3-3-delete.png"
+        title="./pics/3-3-delete.png" /></p>
+<ol>
+<li>先检查写-写冲突，如果meta上记录的时间戳大于当前事务的读时间戳，并且不等于事务的临时时间戳，则冲突。</li>
+<li>如果是自我修改，判断是否有第一个日志，如果有，且日志和meta都未标记删除，重建一次元组，然后直接用它修改第一个日志中的元组值，并设置为标记为删除。</li>
+<li>如果不是自我修改，生成日志，日志中包含<strong>所有字段</strong>，并设置为标记为删除。类似<strong>链表的插入</strong>操作，插入到<code>base tuple</code>和第一个日志之间。</li>
+</ol>
+<h4 id="update">update</h4>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/3-3-update.png"
+        data-srcset="./pics/3-3-update.png, ./pics/3-3-update.png 1.5x, ./pics/3-3-update.png 2x"
+        data-sizes="auto"
+        alt="./pics/3-3-update.png"
+        title="./pics/3-3-update.png" /></p>
+<ol>
+<li>与删除类似。</li>
+</ol>
+<h3 id="stop-the-world-garbage-collection">Stop-the-world Garbage Collection</h3>
+<blockquote>
+<p>现在的代码中，一旦事务添加到事务<code>map</code>中，我们就永远不会删除它，因为具有较低读取时间戳的事务可能需要读取存储在先前提交或中止的事务中的撤销日志。在本任务中，你需要实现一个简单的垃圾收集策略，以<strong>删除未使用的事务。</strong></p>
+</blockquote>
+<p>当调用<code>GarbageCollection</code>时，会手动触发垃圾收集。在任务1中，我们已经实现了一个算法来计算水印（系统中最低的<code>read_ts</code>）。在此任务中，你将需要删除不包含任何对具有最低<code>read_ts</code>（水印）的事务可见的撤消日志的所有事务。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/3-4-garbage-collection.png"
+        data-srcset="./pics/3-4-garbage-collection.png, ./pics/3-4-garbage-collection.png 1.5x, ./pics/3-4-garbage-collection.png 2x"
+        data-sizes="auto"
+        alt="./pics/3-4-garbage-collection.png"
+        title="./pics/3-4-garbage-collection.png" />
+上面的示例说明了水印时间戳为3并且我们提交了txn1，txn2，txn9的情况。Txn1的撤销日志不再可访问，所以我们可以直接删除它。Txn2的元组（A，2）的撤销日志不可访问，<strong>但元组（C，2）仍然可访问（因为它是第一个日志，ts为3的事务会访问到它）</strong>，所以我们现在不能删除它。</p>
+<ol>
+<li>遍历事务<code>map</code>中的所有事务，再遍历每个事务中的写入集里的每个元组。</li>
+<li>对每个元组，遍历日志，<strong>跳过第一个小于等于水印的日志</strong>，对之后的日志，<code>is_deleted</code>设置为true。</li>
+<li>上述操作结束后，遍历事务<code>map</code>，对<code>COMMITTED</code>的事务，查看是该事务所有的<code>UndoLog</code>都标记为删除，如果是，则记录下来，遍历完后<code>erase</code>掉这些事务。</li>
+</ol>
+<h2 id="primary-key-index">Primary Key Index</h2>
+<p>当创建表时指定主键时，BusTub将自动创建一个索引，其<code>is_primary_key</code>属性设置为true。一个表最多只能有一个主键索引。主键索引确保主键的唯一性。</p>
+<h3 id="index-scan-deletes-and-updates">Index Scan, Deletes and Updates</h3>
+<blockquote>
+<p>在此任务中，你需要为删除和更新执行器添加索引支持。首先实现多版本索引扫描执行器，然后实现对插入、更新和删除执行器的更新和删除支持。</p>
+</blockquote>
+<h4 id="index-scan">Index Scan</h4>
+<ol>
+<li>在哈希表中<code>ScanKey</code>寻找，若返回为空则return false。</li>
+<li>不为空则判断是否是自我修改的元组或者时间戳小于当前事务的读时间戳，然后判断元组若是已删除则return false，否则获取元组。</li>
+<li>若不是第二条的情况，说明要遍历日志，将<code>base tuple</code>重构直到一个自己事务可读的日志。其中要判断日志是否存在且有效。</li>
+</ol>
+<h4 id="deletes-and-updates">Deletes and Updates</h4>
+<blockquote>
+<p>一旦在索引中创建了一个条目，它将始终指向同一个RID，即使元组被标记为已删除，它也不会被删除，因此早期的事务仍然可以使用索引扫描执行器访问历史。此时，你还需要重新访问插入执行器。<strong>考虑插入执行器插入到一个元组中的情况，该元组被删除执行器删除。你的实现应该更新已删除的元组，而不是创建新的条目</strong>，因为索引条目一旦创建就始终指向同一个RID。你需要正确处理写-写冲突检测和唯一约束检测。</p>
+</blockquote>
+<p>此时，你还需要考虑其他的竞争条件，若是多个事务同时更新版本链接，则只能允许其中一个继续进行，终止其他的事务。在日志信息中，有一个<code>in_progress</code>字段，表示这个元组是否已经有一个正在进行的事务。</p>
+<p>我理解的是，多个进程竞争时，对<code>in_progress</code>的修改也不是原子操作，可能有几个进程一起获得<code>in_progress</code>，一些进程没有被正确的终止。所以事务在操作版本信息的时候，考虑对这个元组做类似上锁的操作，保证原子性的情况下获取<code>in_progress</code>字段，而阻止剩下的进程。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">auto</span> <span class="nf">LockRID</span><span class="p">(</span><span class="n">RID</span> <span class="n">rid</span><span class="p">,</span> <span class="n">TransactionManager</span> <span class="o">*</span><span class="n">txn_mgr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">version_link</span> <span class="o">=</span> <span class="n">txn_mgr</span><span class="o">-&gt;</span><span class="n">GetVersionLink</span><span class="p">(</span><span class="n">rid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">version_link</span><span class="p">.</span><span class="n">has_value</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="n">txn_mgr</span><span class="o">-&gt;</span><span class="n">UpdateVersionLink</span><span class="p">(</span><span class="n">rid</span><span class="p">,</span> <span class="n">VersionUndoLink</span><span class="p">{</span><span class="n">UndoLink</span><span class="p">{</span><span class="n">version_link</span><span class="o">-&gt;</span><span class="n">prev_</span><span class="p">},</span> <span class="nb">true</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">                                       <span class="p">[</span><span class="n">version_link</span><span class="p">](</span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">VersionUndoLink</span><span class="o">&gt;</span> <span class="n">origin_version_link</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                                         <span class="k">return</span> <span class="n">origin_version_link</span><span class="p">.</span><span class="n">has_value</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">origin_version_link</span><span class="o">-&gt;</span><span class="n">in_progress_</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">                                                <span class="n">origin_version_link</span><span class="o">-&gt;</span><span class="n">prev_</span> <span class="o">==</span> <span class="n">version_link</span><span class="o">-&gt;</span><span class="n">prev_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                                       <span class="p">}));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">txn_mgr</span><span class="o">-&gt;</span><span class="n">UpdateVersionLink</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">rid</span><span class="p">,</span> <span class="n">VersionUndoLink</span><span class="p">{</span><span class="n">UndoLink</span><span class="p">{},</span> <span class="nb">true</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">VersionUndoLink</span><span class="o">&gt;</span> <span class="n">version_link</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="o">!</span><span class="n">version_link</span><span class="p">.</span><span class="n">has_value</span><span class="p">();</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>所以创建一个LockRID的函数，注意到执行<code>UpdateVersionLink</code>会传入一个<code>check</code>函数，我们定义一个<code>check</code>函数来保证，在获取<code>in_progress_</code>的过程中，没有其他进程进入，否则获取失败。</p>
+<p>然后需要在之前的执行器中，涉及日志版本信息修改的时候，都需要先执行<code>LockRID</code>，然后才能进行修改。</p>
+<p>but&hellip;测试中InsertConcurrency和UpdateConcurrency有时能过有时过不了，还没找到原因。</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-01-16</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/cmu15445_concurrency_control/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://guluguluhhhh.github.io/cmu15445_concurrency_control/" data-title="Cmu15445 Concurrency Control"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://guluguluhhhh.github.io/cmu15445_concurrency_control/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://guluguluhhhh.github.io/cmu15445_concurrency_control/" data-title="Cmu15445 Concurrency Control"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="https://guluguluhhhh.github.io/cmu15445_concurrency_control/" data-title="Cmu15445 Concurrency Control"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="https://guluguluhhhh.github.io/cmu15445_concurrency_control/" data-title="Cmu15445 Concurrency Control"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/cmu15445-query_execution/" class="prev" rel="prev" title="Cmu15445 Query Execution"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Cmu15445 Query Execution</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.140.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2022 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":50},"comment":{}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
