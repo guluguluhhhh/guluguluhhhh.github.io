@@ -1,14 +1,22 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
         <title>Categories - Category - 华子的博客</title>
-        <link>https://guluguluhhhh.github.io/categories/</link>
+        <link>http://localhost:1313/categories/</link>
         <description>Categories - Category - 华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 16 Jan 2025 13:35:16 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/categories/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 15 Feb 2025 14:45:18 &#43;0800</lastBuildDate><atom:link href="http://localhost:1313/categories/" rel="self" type="application/rss+xml" /><item>
+    <title>MIT6.5840</title>
+    <link>http://localhost:1313/categories/mit6.5840/</link>
+    <pubDate>Sat, 15 Feb 2025 14:45:18 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://localhost:1313/categories/mit6.5840/</guid>
+    <description><![CDATA[]]></description>
+</item>
+<item>
     <title>CMU</title>
-    <link>https://guluguluhhhh.github.io/categories/cmu/</link>
+    <link>http://localhost:1313/categories/cmu/</link>
     <pubDate>Thu, 16 Jan 2025 13:35:16 &#43;0800</pubDate>
     <author>Author</author>
-    <guid>https://guluguluhhhh.github.io/categories/cmu/</guid>
+    <guid>http://localhost:1313/categories/cmu/</guid>
     <description><![CDATA[]]></description>
 </item>
 </channel>

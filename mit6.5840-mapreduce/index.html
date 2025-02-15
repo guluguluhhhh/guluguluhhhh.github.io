@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Mit6.5840 MapReduce - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="http://localhost:1313/mit6.5840-mapreduce/">
+  <meta property="og:site_name" content="华子的博客">
+  <meta property="og:title" content="Mit6.5840 MapReduce">
+  <meta property="og:description" content="MapReduce 这次实验将构建一个MapReduce系统。需要实现一个worker进程，它调用应用程序Map和Reduce函数并处理阅读和写入文件，以及一个coordinator进程，它将任务分发给worker并处理失败的worker。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-02-15T14:45:18+08:00">
+    <meta property="article:modified_time" content="2025-02-15T14:45:18+08:00">
+    <meta property="article:tag" content="Distributed Systems">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Mit6.5840 MapReduce">
+  <meta name="twitter:description" content="MapReduce 这次实验将构建一个MapReduce系统。需要实现一个worker进程，它调用应用程序Map和Reduce函数并处理阅读和写入文件，以及一个coordinator进程，它将任务分发给worker并处理失败的worker。">
+<meta name="application-name" content="My cool site">
+<meta name="apple-mobile-web-app-title" content="My cool site"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://localhost:1313/mit6.5840-mapreduce/" /><link rel="prev" href="http://localhost:1313/cmu15445_concurrency_control/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="/lib/fontawesome-free/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" href="/lib/animate/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Mit6.5840 MapReduce",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/localhost:1313\/mit6.5840-mapreduce\/"
+        },"genre": "posts","keywords": "Distributed Systems","wordcount":  3365 ,
+        "url": "http:\/\/localhost:1313\/mit6.5840-mapreduce\/","datePublished": "2025-02-15T14:45:18+08:00","dateModified": "2025-02-15T14:45:18+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "huazi"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="华子的博客">华子的博客</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+             
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="华子的博客">华子的博客</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a>
+ 
+        </div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Mit6.5840 MapReduce</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-category">included in <a href="/categories/mit6.5840/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>MIT6.5840</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-02-15">2025-02-15</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;3365 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;7 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#编程模型">编程模型</a>
+      <ul>
+        <li><a href="#map">Map</a></li>
+        <li><a href="#reduce">Reduce</a></li>
+        <li><a href="#example">Example</a></li>
+      </ul>
+    </li>
+    <li><a href="#执行概述">执行概述</a></li>
+    <li><a href="#定义结构体">定义结构体</a></li>
+    <li><a href="#workergo">worker.go</a>
+      <ul>
+        <li><a href="#worker">Worker</a></li>
+        <li><a href="#gettask">GetTask</a></li>
+        <li><a href="#domaptask">DoMapTask</a></li>
+        <li><a href="#doreducetask">DoReduceTask</a></li>
+        <li><a href="#taskdone">TaskDone</a></li>
+      </ul>
+    </li>
+    <li><a href="#coordinatorgo">coordinator.go</a>
+      <ul>
+        <li><a href="#makecoordinator">MakeCoordinator</a></li>
+        <li><a href="#c-coordinator-makemaptasks">(c *Coordinator) MakeMapTasks</a></li>
+        <li><a href="#c-coordinator-makereducetasks">(c *Coordinator) MakeReduceTasks</a></li>
+        <li><a href="#pulltask">PullTask</a></li>
+        <li><a href="#markdone">MarkDone</a></li>
+        <li><a href="#checktimeout">CheckTimeOut</a></li>
+        <li><a href="#done">Done</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="mapreduce">MapReduce</h1>
+<p>这次实验将构建一个MapReduce系统。需要实现一个<strong>worker</strong>进程，它调用应用程序<strong>Map</strong>和<strong>Reduce</strong>函数并处理阅读和写入文件，以及一个<strong>coordinator</strong>进程，它将任务分发给worker并处理失败的worker。</p>
+<h2 id="编程模型">编程模型</h2>
+<p>计算的输入是一系列键值对，输出也是一系列键值对，可以把MapReduce的计算过程表示为两个函数：<em><strong>Map</strong></em>和<em><strong>Reduce</strong></em>。</p>
+<h3 id="map">Map</h3>
+<p>Map由用户实现，用<strong>一个键值对</strong>产生一系列<strong>中间键值对</strong>，然后将所有具有相同Key <em>I</em>的中间键值对组合在一起并发送给Reduce函数。</p>
+<h3 id="reduce">Reduce</h3>
+<p>Reduce也是由用户实现，接受一个Key <em>I</em>和一些具有这个Key <em>I</em>的值，它会合并这所有的值，产生尽可能更少数量的值。一般来说，每个Reduce过程只会产生一个或者零个输出值。</p>
+<h3 id="example">Example</h3>
+<p>下面伪代码中，处理的问题是计算大量文档中每个单词出现的次数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">map</span><span class="p">(</span><span class="n">String</span> <span class="n">key</span><span class="p">,</span> <span class="n">String</span> <span class="n">value</span><span class="p">)</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// key: document name
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// value: document contents
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="n">each</span> <span class="n">word</span> <span class="n">w</span> <span class="n">in</span> <span class="nl">value</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">EmitIntermediate</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="s">&#34;1&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">reduce</span><span class="p">(</span><span class="n">String</span> <span class="n">key</span><span class="p">,</span> <span class="n">Iterator</span> <span class="n">values</span><span class="p">)</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// key: a word
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// values: a list of counts
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">each</span> <span class="n">v</span> <span class="n">in</span> <span class="nl">values</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">+=</span> <span class="n">ParseInt</span><span class="p">(</span><span class="n">v</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Emit</span><span class="p">(</span><span class="n">AsString</span><span class="p">(</span><span class="n">result</span><span class="p">));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>map</strong>函数根据文件名和文件内容，每次发出单词加上一个计数，<strong>reduce</strong>函数总和某个特定单词的所有计数。</p>
+<h2 id="执行概述">执行概述</h2>
+<p><em><strong>Map</strong></em>的调用是分布在多个机器上的，且输入数据被自动拆分为M个小块，每个拆分块可以在不同的机器上并行处理。<em><strong>Reduce</strong></em>是通过使用拆分函数（例如，<em>hash(key) mod R</em>）将中间键空间分割成R块来调用。拆分数量（R）和拆分函数由用户指定。
+下图描述了MapReduce的执行过程：
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/mapreduce.jpg"
+        data-srcset="./pics/mapreduce.jpg, ./pics/mapreduce.jpg 1.5x, ./pics/mapreduce.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/mapreduce.jpg"
+        title="./pics/mapreduce.jpg" /></p>
+<ol>
+<li>用户程序中的MapReduce库首先将输入文件拆分为M块，通常每块16MB到64MB（用户可以通过可选参数进行控制）。然后，它在机器集群上启动程序的许多副本。</li>
+<li>其中一个程序的副本很特别——<strong>master</strong>，其余的是<strong>master</strong>分配工作的<strong>worker</strong>。有M个map任务和R个reduce任务要分配。master选择闲置的worker，并为其分配一个map任务或reduce任务。</li>
+<li>被分配到map任务的<strong>worker</strong>会读取相应输入拆分的内容。它从输入数据中解析键值对，并将每对传递给用户定义的Map函数。Map函数生成的中间键值对在内存中缓冲。</li>
+<li>缓冲对会定期写入本地磁盘，由拆分函数分区为R个区域。本地磁盘上这些缓冲对的位置被传递回<strong>master</strong>，<strong>master</strong>负责将这些位置转发给<strong>reduce workers</strong>。</li>
+<li>当<strong>master</strong>通知<strong>reduce workers</strong>这些位置时，它会使用远程过程调用RPC从<strong>map workers</strong>的本地磁盘中读取缓冲数据。当<strong>reduce workers</strong>读取了所有中间数据时，它会按中间键对数据进行<em><strong>排序</strong></em>，以便将所有出现的同一键分组在一起。需要排序是因为通常许多不同的键映射到相同的reduce任务。如果中间数据量太大，无法放入内存中，则使用外部排序。</li>
+<li><strong>reduce workers</strong>迭代排序的中间数据，对于每个输入的唯一中间键，它将键和相应的中间值集传递给用户的reduce函数。Reduce函数的输出被附加到此reduce分区的最终输出文件中。</li>
+<li>当所有map任务和reduce任务都已完成时，<strong>master</strong>会唤醒用户程序。此时，用户程序中的MapReduce调用返回到用户代码。成功完成时，mapreduce执行的输出应该在R个文件里（每个reduce任务生成一个），通常不需要把它们合并到一起。</li>
+</ol>
+<h2 id="定义结构体">定义结构体</h2>
+<p>rpc.go</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Task</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">TaskType</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">FileName</span> <span class="kt">string</span>     <span class="c1">//存储map任务的单个文件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">FileNames</span> <span class="p">[]</span><span class="kt">string</span>  <span class="c1">//存储reduce任务的多个中间文件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">TaskId</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ReduceNum</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>coordinator.go</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">TaskMetaInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">TaskAddr</span> <span class="o">*</span><span class="nx">Task</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">state</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">BeginTime</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Time</span> <span class="c1">//记录开始时间，用来计算超时
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">TaskMetaHolder</span> <span class="kd">struct</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">	<span class="nx">MetaMap</span> <span class="kd">map</span><span class="p">[</span><span class="kt">int</span><span class="p">]</span><span class="o">*</span><span class="nx">TaskMetaInfo</span> <span class="c1">//存储所有任务信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Coordinator</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">State</span>          <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">MapChan</span>        <span class="kd">chan</span> <span class="o">*</span><span class="nx">Task</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ReduceChan</span>     <span class="kd">chan</span> <span class="o">*</span><span class="nx">Task</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ReduceNum</span>      <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Files</span>          <span class="p">[]</span><span class="kt">string</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">taskMetaHolder</span> <span class="nx">TaskMetaHolder</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">mu</span>             <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在Coodinator中，用Go的<code>channal</code>来实现同步，保证线程安全，但仍然有部分公共资源的访问需要加锁，如<code>taskMetaHolder</code>。</p>
+<h2 id="workergo">worker.go</h2>
+<h3 id="worker">Worker</h3>
+<p>循环执行<code>GetTask()</code>来获取任务，若</p>
+<ul>
+<li>任务类型为<em>MapTask</em>，则调用<code>DoMapTask</code>函数，执行完后调用<code>TaskDone</code>函数来告诉coordinator已经执行完毕。</li>
+<li>任务类型为<em>ReduceTask</em>， 则调用<code>DoReduceTask</code>函数，执行完后调用<code>TaskDone</code>函数来告诉coordinator已经执行完毕。</li>
+<li>任务类型为<em>WaitingTask</em>，则调用<code>time.Sleep(time.Second)</code>，等待一秒。</li>
+<li>任务类型为<em>ExitTask</em>，则退出循环。</li>
+</ul>
+<h3 id="gettask">GetTask</h3>
+<p>模仿CallExample的流程，利用RPC来调用Coordinator中的<code>PullTask</code>函数，请求一个任务。</p>
+<h3 id="domaptask">DoMapTask</h3>
+<ol>
+<li>打开并读取FileName的文件，把文件名和内容传入<code>mapf</code>函数，返回一系列中间键值对。</li>
+<li>对键用哈希，把结果分类放入二维数组中。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">	<span class="nx">HashKv</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="nx">KeyValue</span><span class="p">,</span> <span class="nx">reduceNum</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">kv</span> <span class="o">:=</span> <span class="k">range</span><span class="p">(</span><span class="nx">intermediate</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">index</span> <span class="o">:=</span> <span class="nf">ihash</span><span class="p">(</span><span class="nx">kv</span><span class="p">.</span><span class="nx">Key</span><span class="p">)</span> <span class="o">%</span> <span class="nx">reduceNum</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">HashKv</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">HashKv</span><span class="p">[</span><span class="nx">index</span><span class="p">],</span> <span class="nx">kv</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li>根据实验指导中的提示，利用<code>json.NewEncoder</code>，把中间键值对存入文件中，键的哈希值相同的放在同一个文件中，文件命名方式为<code> &quot;mr-tmp-&quot; + task.TaskId + &quot;-&quot; + index</code>，每个map任务产生reduceNum个文件。<em><strong>如此一来，不同index对应的中间文件里的键就不相同，分布式并行处理起来互不干扰，每个reduce worker只需获取属于自己index的那些文件来计算。</strong></em></li>
+</ol>
+<h3 id="doreducetask">DoReduceTask</h3>
+<ol>
+<li>根据task.FileNames，打开并读取多个中间文件，把所有键值对放在一个数组中，然后用sort排序（同理mrsequential.go）。</li>
+<li>输出文件命名为<code>&quot;mr-out-&quot; + task.TaskId</code>。</li>
+<li>遍历排序后的中间键值对，计算相同的键出现的次数，并写入输出文件中。</li>
+</ol>
+<h3 id="taskdone">TaskDone</h3>
+<p>用RPC调用Coordinator的<code>MarkDone</code>函数，通知Coordinator已经执行完毕。</p>
+<h2 id="coordinatorgo">coordinator.go</h2>
+<h3 id="makecoordinator">MakeCoordinator</h3>
+<ol>
+<li>初始化<code>Coordinator</code>结构体。</li>
+<li>执行<code>c.MakeMapTasks</code>函数，生成map任务。</li>
+<li>执行<code>go c.CheckTimeOut()</code>，定期检查任务是否超时。</li>
+</ol>
+<h3 id="c-coordinator-makemaptasks">(c *Coordinator) MakeMapTasks</h3>
+<p>遍历所有输入文件，每个文件生成一个map任务，并放入<code>c.MapChan</code>中，并维护<code>c.taskMetaHolder</code>信息。</p>
+<h3 id="c-coordinator-makereducetasks">(c *Coordinator) MakeReduceTasks</h3>
+<ol>
+<li>生成<code>ReduceNum</code>个reduce任务，并放入<code>c.ReduceChan</code>中，并维护<code>c.taskMetaHolder</code>信息。</li>
+<li>初始化task的时候，<code>TaskId</code>从<code>len(c.Files)+1</code>开始，即跟在map任务后面。</li>
+<li>初始化task的时候需要传入<code>FileNames</code>，即map任务产生的中间文件，例如最开始的一个reduce任务需要文件mr-tmp-0-0，mr-tmp-1-0，mr-tmp-2-0&hellip;筛选最后一个数字为0的中间文件。</li>
+</ol>
+<h3 id="pulltask">PullTask</h3>
+<p>供worker的<code>GetTask</code>远程调用，来分配任务给worker。</p>
+<ol>
+<li>由于只能所有map任务执行完之后才能进入到reduce阶段，所以这里先要check是否当前所有任务都执行完毕，若已经执行完毕，就进入下一个阶段，若下一阶段是reduce，就需要执行<code>c.makeReduceTasks()</code>，若当前已经是reduce阶段，则进入到<code>ALLDone</code>阶段。这一部分访问公共资源，需要加锁。</li>
+<li>接下来判断若当前<code>c.State</code>为<code>MapState</code>，则从<code>c.MapChan</code>中取一个任务给<code>*reply</code>，然后初始化一下<code>TaskMetaInfo</code>信息，设置任务的<code>state</code>和<code>BeginTime</code>。</li>
+<li>若当前<code>c.State</code>为<code>ReduceState</code>，则从<code>c.ReduceChan</code>中取一个任务给<code>*reply</code>，同样的方式初始化。</li>
+<li>否则返回一个<code>ExitTask</code>类型的任务，告知worker退出。</li>
+</ol>
+<h3 id="markdone">MarkDone</h3>
+<p>访问公共资源，上锁。把<code>taskMetaHolder</code>中对应任务的<code>meta.state</code>设置为<code>Done</code>。</p>
+<h3 id="checktimeout">CheckTimeOut</h3>
+<ol>
+<li>执行循环，开始调用<code>time.Sleep</code>，每两秒检查一次是否有任务超时，访问公共资源，上锁。</li>
+<li>如果<code>c.State</code>为<code>ALLDone</code>，则直接返回。</li>
+<li>依次访问所有<code>c.taskMetaHolder.MetaMap</code>中的任务，如果任务超时，就停止该任务，并重新放入任务Channal中。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">c</span><span class="p">.</span><span class="nx">taskMetaHolder</span><span class="p">.</span><span class="nx">MetaMap</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="nx">v</span><span class="p">.</span><span class="nx">state</span> <span class="o">==</span> <span class="nx">Working</span> <span class="o">&amp;&amp;</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Since</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">BeginTime</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">10</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span> <span class="p">{</span>	<span class="c1">// 超时了
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>				<span class="k">if</span> <span class="nx">v</span><span class="p">.</span><span class="nx">TaskAddr</span><span class="p">.</span><span class="nx">TaskType</span> <span class="o">==</span> <span class="nx">MapTask</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">					<span class="nx">v</span><span class="p">.</span><span class="nx">state</span> <span class="p">=</span> <span class="nx">Waiting</span>
+</span></span><span class="line"><span class="cl">					<span class="nx">c</span><span class="p">.</span><span class="nx">MapChan</span> <span class="o">&lt;-</span> <span class="nx">v</span><span class="p">.</span><span class="nx">TaskAddr</span>
+</span></span><span class="line"><span class="cl">				<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">v</span><span class="p">.</span><span class="nx">TaskAddr</span><span class="p">.</span><span class="nx">TaskType</span> <span class="o">==</span> <span class="nx">ReduceTask</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">					<span class="nx">v</span><span class="p">.</span><span class="nx">state</span> <span class="p">=</span> <span class="nx">Waiting</span>
+</span></span><span class="line"><span class="cl">					<span class="nx">c</span><span class="p">.</span><span class="nx">ReduceChan</span> <span class="o">&lt;-</span> <span class="nx">v</span><span class="p">.</span><span class="nx">TaskAddr</span>
+</span></span><span class="line"><span class="cl">				<span class="p">}</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="done">Done</h3>
+<p>这个函数是给主函数中调用，来检查是否所有任务都执行完毕。这里只需查看<code>c.State</code>是否为<code>ALLDone</code>，若为<code>ALLDone</code>，则返回true，否则返回false。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/pass.jpg"
+        data-srcset="./pics/pass.jpg, ./pics/pass.jpg 1.5x, ./pics/pass.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/pass.jpg"
+        title="./pics/pass.jpg" /></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-02-15</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/mit6.5840-mapreduce/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://localhost:1313/mit6.5840-mapreduce/" data-title="Mit6.5840 MapReduce" data-hashtags="Distributed Systems"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://localhost:1313/mit6.5840-mapreduce/" data-hashtag="Distributed Systems"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://localhost:1313/mit6.5840-mapreduce/" data-title="Mit6.5840 MapReduce"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://localhost:1313/mit6.5840-mapreduce/" data-title="Mit6.5840 MapReduce"><i data-svg-src="/lib/simple-icons/icons/line.min.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://localhost:1313/mit6.5840-mapreduce/" data-title="Mit6.5840 MapReduce"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/distributed-systems/">Distributed Systems</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/cmu15445_concurrency_control/" class="prev" rel="prev" title="Cmu15445 Concurrency Control"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Cmu15445 Concurrency Control</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">完美的生活～</div><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.140.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":50},"comment":{}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
