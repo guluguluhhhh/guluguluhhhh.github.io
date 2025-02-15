@@ -1,38 +1,25 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
         <title>华子的博客</title>
-        <link>http://localhost:1313/</link>
+        <link>https://guluguluhhhh.github.io/</link>
         <description>华子的博客</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 15 Feb 2025 14:45:18 &#43;0800</lastBuildDate>
-            <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+            <atom:link href="https://guluguluhhhh.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
     <title>Mit6.5840 MapReduce</title>
-    <link>http://localhost:1313/mit6.5840-mapreduce/</link>
+    <link>https://guluguluhhhh.github.io/mit6.5840-mapreduce/</link>
     <pubDate>Sat, 15 Feb 2025 14:45:18 &#43;0800</pubDate>
     <author>huazi</author>
-    <guid>http://localhost:1313/mit6.5840-mapreduce/</guid>
+    <guid>https://guluguluhhhh.github.io/mit6.5840-mapreduce/</guid>
     <description><![CDATA[<h1 id="mapreduce">MapReduce</h1>
 <p>这次实验将构建一个MapReduce系统。需要实现一个<strong>worker</strong>进程，它调用应用程序<strong>Map</strong>和<strong>Reduce</strong>函数并处理阅读和写入文件，以及一个<strong>coordinator</strong>进程，它将任务分发给worker并处理失败的worker。</p>]]></description>
 </item>
 <item>
-    <title>Cmu15445 Concurrency Control</title>
-    <link>http://localhost:1313/cmu15445_concurrency_control/</link>
-    <pubDate>Thu, 16 Jan 2025 13:35:16 &#43;0800</pubDate>
-    <author>huazi</author>
-    <guid>http://localhost:1313/cmu15445_concurrency_control/</guid>
-    <description><![CDATA[<h1 id="concurrency-control">Concurrency Control</h1>
-<p>在这个项目中，你将通过实现乐观多版本并发控制（MVOCC）来为BusTub添加事务支持。</p>
-<h2 id="timestamps">Timestamps</h2>
-<h3 id="timestamp-allocation">Timestamp Allocation</h3>
-<blockquote>
-<p>当一个事务开始时，它将被分配一个<strong>读时间戳</strong>，这是最近提交的事务的提交时间戳。在事务提交时，它将被分配一个单调递增的<strong>提交时间戳</strong>。<strong>读时间戳确定事务可以读取哪些数据，而提交时间戳确定事务的序列化顺序。</strong></p>]]></description>
-</item>
-<item>
     <title>Cmu15445 Query Execution</title>
-    <link>http://localhost:1313/cmu15445-query_execution/</link>
+    <link>https://guluguluhhhh.github.io/cmu15445-query_execution/</link>
     <pubDate>Wed, 15 Jan 2025 10:45:30 &#43;0800</pubDate>
     <author>huazi</author>
-    <guid>http://localhost:1313/cmu15445-query_execution/</guid>
+    <guid>https://guluguluhhhh.github.io/cmu15445-query_execution/</guid>
     <description><![CDATA[<h1 id="query-execution">Query Execution</h1>
 <p>在这次项目中，将实现允许 BusTub 执行查询的组件。具体是创建执行 SQL 查询的运算符执行程序，并实施优化器规则来转换查询计划。</p>
 <p>BusTub的架构如下：
@@ -40,29 +27,29 @@
 </item>
 <item>
     <title>Cmu15445 Extendible Hash Index</title>
-    <link>http://localhost:1313/cmu15445-extendible_hash_index/</link>
+    <link>https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/</link>
     <pubDate>Tue, 14 Jan 2025 12:41:00 &#43;0800</pubDate>
     <author>huazi</author>
-    <guid>http://localhost:1313/cmu15445-extendible_hash_index/</guid>
+    <guid>https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/</guid>
     <description><![CDATA[<h1 id="extendible-hash-index">Extendible Hash Index</h1>
 <p>在此编程项目中，将使用<strong>可扩展哈希</strong>的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。</p>
 <p>下图显示了一个可扩展哈希表，其中<code>header</code>页最大深度为 2，<code>directory</code>页最大深度为 2，存储<code>bucket</code>页最多包含两个条目。值被省略，并且<strong>键的哈希值</strong>显示在<code>bucket</code>页面中，而不是键本身。</p>]]></description>
 </item>
 <item>
     <title>Cmu15445 Buffer Pool</title>
-    <link>http://localhost:1313/cmu15445-buffer_pool/</link>
+    <link>https://guluguluhhhh.github.io/cmu15445-buffer_pool/</link>
     <pubDate>Mon, 13 Jan 2025 16:49:33 &#43;0800</pubDate>
     <author>huazi</author>
-    <guid>http://localhost:1313/cmu15445-buffer_pool/</guid>
+    <guid>https://guluguluhhhh.github.io/cmu15445-buffer_pool/</guid>
     <description><![CDATA[<h1 id="buffer-pool">Buffer Pool</h1>
 <p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p>]]></description>
 </item>
 <item>
     <title>Cmu15445 Trie</title>
-    <link>http://localhost:1313/cmu15445-trie/</link>
+    <link>https://guluguluhhhh.github.io/cmu15445-trie/</link>
     <pubDate>Mon, 13 Jan 2025 09:55:13 &#43;0800</pubDate>
     <author>huazi</author>
-    <guid>http://localhost:1313/cmu15445-trie/</guid>
+    <guid>https://guluguluhhhh.github.io/cmu15445-trie/</guid>
     <description><![CDATA[<h1 id="trie">Trie</h1>
 <p>trie 实现的是键值存储，字符串键可以映射到任何类型值。键的值存储在改键的最后一个字符的终端节点。例如将（“ab”， 1） 和 （“ac”， “val”） 插入到 trie 中。
 </p>]]></description>
