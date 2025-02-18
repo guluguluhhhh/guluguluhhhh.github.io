@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Mit6.5840 KVServer - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="https://guluguluhhhh.github.io/mit6.5840-kvserver/">
+  <meta property="og:site_name" content="华子的博客">
+  <meta property="og:title" content="Mit6.5840 KVServer">
+  <meta property="og:description" content="Key/Value Server 本次试验中，将为一台机器构建一个键值服务器，该服务器确保即使网络故障，每个操作也只执行一次，且操作是线性化的。后面的实验将会复制这样的服务器来处理服务器崩溃。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-02-18T16:00:38+08:00">
+    <meta property="article:modified_time" content="2025-02-18T16:00:38+08:00">
+    <meta property="article:tag" content="Distributed Systems">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Mit6.5840 KVServer">
+  <meta name="twitter:description" content="Key/Value Server 本次试验中，将为一台机器构建一个键值服务器，该服务器确保即使网络故障，每个操作也只执行一次，且操作是线性化的。后面的实验将会复制这样的服务器来处理服务器崩溃。">
+<meta name="application-name" content="My cool site">
+<meta name="apple-mobile-web-app-title" content="My cool site"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://guluguluhhhh.github.io/mit6.5840-kvserver/" /><link rel="prev" href="https://guluguluhhhh.github.io/mit6.5840-mapreduce/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Mit6.5840 KVServer",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/guluguluhhhh.github.io\/mit6.5840-kvserver\/"
+        },"genre": "posts","keywords": "Distributed Systems","wordcount":  1382 ,
+        "url": "https:\/\/guluguluhhhh.github.io\/mit6.5840-kvserver\/","datePublished": "2025-02-18T16:00:38+08:00","dateModified": "2025-02-18T16:00:38+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "huazi"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="华子的博客">华子的博客</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+             
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="华子的博客">华子的博客</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a>
+ 
+        </div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Mit6.5840 KVServer</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-category">included in <a href="/categories/mit6.5840/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>MIT6.5840</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-02-18">2025-02-18</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;1382 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;3 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#执行概述">执行概述</a></li>
+    <li><a href="#结构体定义">结构体定义</a></li>
+    <li><a href="#clientgo">client.go</a>
+      <ul>
+        <li><a href="#makeclerk">MakeClerk</a></li>
+        <li><a href="#get">Get</a></li>
+        <li><a href="#putappend">PutAppend</a></li>
+      </ul>
+    </li>
+    <li><a href="#servergo">server.go</a>
+      <ul>
+        <li><a href="#get-1">Get</a></li>
+        <li><a href="#put">Put</a></li>
+      </ul>
+    </li>
+    <li><a href="#append">Append</a></li>
+    <li><a href="#startkvserver">StartKVServer</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="keyvalue-server">Key/Value Server</h1>
+<p>本次试验中，将为一台机器构建一个键值服务器，该服务器确保即使网络故障，每个操作<strong>也只执行一次</strong>，且操作是<strong>线性化</strong>的。后面的实验将会复制这样的服务器来处理服务器崩溃。</p>
+<ul>
+<li>
+<p><em><strong>线性一致性</strong></em>：最强的数据一致性保证，所有操作看起来像是按照某种全局顺序执行的，与<strong>真实的时间顺序</strong>一致，系统表现的像是一个单机系统，所有操作都是原子的。（分布式锁、金融系统）</p>
+</li>
+<li>
+<p><em><strong>顺序一致性</strong></em>：操作按照某种顺序执行，但不一定与真实时间一致。（多线程编程模型）</p>
+</li>
+<li>
+<p><em><strong>最终一致性</strong></em>：系统<strong>最终</strong>会达到一致状态，但中间可能存在不一致。（DNS 系统、分布式缓存）</p>
+</li>
+<li>
+<p><em><strong>因果一致性</strong></em>：保证<strong>因果关系</strong>的操作顺序，但不保证无关操作的顺序。（社交网络中的消息传递）</p>
+</li>
+</ul>
+<h2 id="执行概述">执行概述</h2>
+<p>Clients可以向KVServer发送三种不同的RPC请求：<code>Put(key, value)</code>, <code>Append(key, arg)</code>,  <code>Get(key)</code>。KVServer维护键值对的内存映射map。每个Client通过一个带有Put/Append/Get方法的<code>Clerk</code>与服务器进行对话。Clerk管理RPC与服务器的交互。</p>
+<ul>
+<li><code>Put(key, value)</code>：设置或者替换一个特定键在map中的值。</li>
+<li><code>Append(key, arg)</code>：将arg附加到键对应的值后面，并返回旧值。</li>
+<li><code>Get(key)</code>：返回键对应的值，如果键不存在则返回空字符串。</li>
+</ul>
+<p>提供线性一致性会使应用程序更方便，因为它是你在服务器上看到的行为，该服务器一次处理一个请求。当一个客户从服务器成功响应更新请求，则随后从其他客户端启动的读取就可以保证看到更新的效果。对于单个服务器来说，提供线性一致性也相对容易。</p>
+<h2 id="结构体定义">结构体定义</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// client.go
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Clerk</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">server</span> <span class="o">*</span><span class="nx">labrpc</span><span class="p">.</span><span class="nx">ClientEnd</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">requestId</span> <span class="kt">int64</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// server.go
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">KVServer</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">mu</span>              <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// Your definitions here.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">kvMap</span>           <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">pushAppendCache</span> <span class="kd">map</span><span class="p">[</span><span class="kt">int64</span><span class="p">]</span><span class="nx">PutAppendReply</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Put or Append
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">PutAppendArgs</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Key</span>       <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Value</span>     <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">RequestId</span> <span class="kt">int64</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">PutAppendReply</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Value</span>   <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ReplyId</span> <span class="kt">int64</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">GetArgs</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Key</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">GetReply</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Value</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="clientgo">client.go</h2>
+<h3 id="makeclerk">MakeClerk</h3>
+<ol>
+<li>初始化Clerk，赋值server，用nrand()创建一个requestId</li>
+</ol>
+<h3 id="get">Get</h3>
+<ol>
+<li>创建<code>GetArgs{Key: key}</code>和<code>GetReply{}</code>，用来发送RPC请求</li>
+<li>循环发送RPC请求处理Get，直到响应成功时，返回<code>reply.Value</code>。</li>
+</ol>
+<h3 id="putappend">PutAppend</h3>
+<p>put和append操作的公共部分。</p>
+<ol>
+<li>创建<code>PutAppendArgs{Key: key, Value: value, RequestId: ck.requestId}</code>和<code>PutAppendReply{}</code>，用来发送RPC请求。</li>
+<li>根据传入的参数<code>op</code>，循环发送RPC请求处理Put/Append，直到响应成功时，返回<code>reply.Value</code>，且requestId自增1。</li>
+</ol>
+<h2 id="servergo">server.go</h2>
+<h3 id="get-1">Get</h3>
+<ol>
+<li>获取锁，避免脏读到中间状态。</li>
+<li>读取<code>kvMap</code>对应key的值，若存在，则把值返回给<code>reply</code>，否则返回空字符串。</li>
+</ol>
+<h3 id="put">Put</h3>
+<ol>
+<li>获取锁。</li>
+<li><strong>查看<code>pushAppendCache</code>，若存在该<code>requesID</code>，则把对应的值返回给<code>reply</code>，然后return。</strong></li>
+<li>否则，设置<code>kvMap</code>对应key的值，然后把该<code>requestId</code>和<code>reply</code>添加到<code>pushAppendCache</code>中。</li>
+<li>清理上一个请求的缓存。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nb">delete</span><span class="p">(</span><span class="nx">kv</span><span class="p">.</span><span class="nx">pushAppendCache</span><span class="p">,</span> <span class="nx">args</span><span class="p">.</span><span class="nx">RequestId</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里的<code>pushAppendCache</code>的作用是，如果客户端发送了<code>Put/Append</code>请求，但服务器崩溃了，那么客户端会重新发送请求，这里就可以检查<code>requestID</code>是否存在于缓存，保证每个操作只执行一次。</p>
+<h2 id="append">Append</h2>
+<p>处理过程与Put相同，区别在于Put是直接修改对应key的值，而Appen的是把值附加到对应key的值后面。</p>
+<h2 id="startkvserver">StartKVServer</h2>
+<p>初始化服务器的kvMap和pushAppendCache。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">kv</span><span class="p">.</span><span class="nx">kvMap</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">kv</span><span class="p">.</span><span class="nx">pushAppendCache</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">int64</span><span class="p">]</span><span class="nx">PutAppendReply</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/pass.jpg"
+        data-srcset="./pics/pass.jpg, ./pics/pass.jpg 1.5x, ./pics/pass.jpg 2x"
+        data-sizes="auto"
+        alt="./pics/pass.jpg"
+        title="./pics/pass.jpg" /></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-02-18</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/mit6.5840-kvserver/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://guluguluhhhh.github.io/mit6.5840-kvserver/" data-title="Mit6.5840 KVServer" data-hashtags="Distributed Systems"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://guluguluhhhh.github.io/mit6.5840-kvserver/" data-hashtag="Distributed Systems"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://guluguluhhhh.github.io/mit6.5840-kvserver/" data-title="Mit6.5840 KVServer"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="https://guluguluhhhh.github.io/mit6.5840-kvserver/" data-title="Mit6.5840 KVServer"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="https://guluguluhhhh.github.io/mit6.5840-kvserver/" data-title="Mit6.5840 KVServer"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/distributed-systems/">Distributed Systems</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/mit6.5840-mapreduce/" class="prev" rel="prev" title="Mit6.5840 MapReduce"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Mit6.5840 MapReduce</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">完美的生活～</div><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.140.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":50},"comment":{}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

@@ -3,7 +3,16 @@
         <title>All Posts - 华子的博客</title>
         <link>https://guluguluhhhh.github.io/posts/</link>
         <description>All Posts | 华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 15 Feb 2025 14:45:18 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 18 Feb 2025 16:00:38 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Mit6.5840 KVServer</title>
+    <link>https://guluguluhhhh.github.io/mit6.5840-kvserver/</link>
+    <pubDate>Tue, 18 Feb 2025 16:00:38 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>https://guluguluhhhh.github.io/mit6.5840-kvserver/</guid>
+    <description><![CDATA[<h1 id="keyvalue-server">Key/Value Server</h1>
+<p>本次试验中，将为一台机器构建一个键值服务器，该服务器确保即使网络故障，每个操作<strong>也只执行一次</strong>，且操作是<strong>线性化</strong>的。后面的实验将会复制这样的服务器来处理服务器崩溃。</p>]]></description>
+</item>
+<item>
     <title>Mit6.5840 MapReduce</title>
     <link>https://guluguluhhhh.github.io/mit6.5840-mapreduce/</link>
     <pubDate>Sat, 15 Feb 2025 14:45:18 &#43;0800</pubDate>
