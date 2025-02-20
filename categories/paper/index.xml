@@ -1,0 +1,16 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Paper - Category - 华子的博客</title>
+        <link>https://guluguluhhhh.github.io/categories/paper/</link>
+        <description>Paper - Category - 华子的博客</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 20 Feb 2025 14:24:11 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/categories/paper/" rel="self" type="application/rss+xml" /><item>
+    <title>Raft论文阅读记录</title>
+    <link>https://guluguluhhhh.github.io/raft/</link>
+    <pubDate>Thu, 20 Feb 2025 14:24:11 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>https://guluguluhhhh.github.io/raft/</guid>
+    <description><![CDATA[<h1 id="摘要">摘要</h1>
+<p>Raft是一种用于管理复制日志的共识算法。它的结果等价与Paxos，并且效率相当，但它的结构更容易理解。为了增强可理解性，Raft将共识的关键要素（例如领导者选举、日志复制和安全性）分离开来，并强制执行更强的一致性要求，从而减少了需要考虑的状态数量。此外，Raft 还引入了一种新的集群成员变更机制，该机制通过使用重叠的多数派来保证安全性。</p>]]></description>
+</item>
+</channel>
+</rss>

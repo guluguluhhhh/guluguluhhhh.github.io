@@ -67,6 +67,12 @@
         alt="/images/head-image.png"
         title="/images/head-image.png" /></a></div><div class="home-subtitle"><div id="id-1" class="typeit"></div></div><div class="links"><a href="https://github.com/guluguluhhhh" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github fa-fw" aria-hidden="true"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/raft/">Raft论文阅读记录</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-02-20">2025-02-20</time></span>&nbsp;<span class="post-category">included in <a href="/categories/paper/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>Paper</a></span></div><div class="content"><h1 id="摘要">摘要</h1>
+<p>Raft是一种用于管理复制日志的共识算法。它的结果等价与Paxos，并且效率相当，但它的结构更容易理解。为了增强可理解性，Raft将共识的关键要素（例如领导者选举、日志复制和安全性）分离开来，并强制执行更强的一致性要求，从而减少了需要考虑的状态数量。此外，Raft 还引入了一种新的集群成员变更机制，该机制通过使用重叠的多数派来保证安全性。</p></div><div class="post-footer">
+        <a href="/raft/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/distributed-systems/">Distributed Systems</a>,&nbsp;<a href="/tags/consensus-algorithm/">Consensus Algorithm</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/mit6.5840-kvserver/">Mit6.5840 KVServer</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-02-18">2025-02-18</time></span>&nbsp;<span class="post-category">included in <a href="/categories/mit6.5840/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>MIT6.5840</a></span></div><div class="content"><h1 id="keyvalue-server">Key/Value Server</h1>
 <p>本次试验中，将为一台机器构建一个键值服务器，该服务器确保即使网络故障，每个操作<strong>也只执行一次</strong>，且操作是<strong>线性化</strong>的。后面的实验将会复制这样的服务器来处理服务器崩溃。</p></div><div class="post-footer">
@@ -78,6 +84,16 @@
 <p>这次实验将构建一个MapReduce系统。需要实现一个<strong>worker</strong>进程，它调用应用程序<strong>Map</strong>和<strong>Reduce</strong>函数并处理阅读和写入文件，以及一个<strong>coordinator</strong>进程，它将任务分发给worker并处理失败的worker。</p></div><div class="post-footer">
         <a href="/mit6.5840-mapreduce/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/distributed-systems/">Distributed Systems</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/cmu15445_concurrency_control/">Cmu15445 Concurrency Control</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-01-16">2025-01-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="concurrency-control">Concurrency Control</h1>
+<p>在这个项目中，你将通过实现乐观多版本并发控制（MVOCC）来为BusTub添加事务支持。</p>
+<h2 id="timestamps">Timestamps</h2>
+<h3 id="timestamp-allocation">Timestamp Allocation</h3>
+<blockquote>
+<p>当一个事务开始时，它将被分配一个<strong>读时间戳</strong>，这是最近提交的事务的提交时间戳。在事务提交时，它将被分配一个单调递增的<strong>提交时间戳</strong>。<strong>读时间戳确定事务可以读取哪些数据，而提交时间戳确定事务的序列化顺序。</strong></p></div><div class="post-footer">
+        <a href="/cmu15445_concurrency_control/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/database/">Database</a></div></div>
 </article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/cmu15445-query_execution/">Cmu15445 Query Execution</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-01-15">2025-01-15</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="query-execution">Query Execution</h1>
@@ -100,27 +116,15 @@
 <p>下图显示了一个可扩展哈希表，其中<code>header</code>页最大深度为 2，<code>directory</code>页最大深度为 2，存储<code>bucket</code>页最多包含两个条目。值被省略，并且<strong>键的哈希值</strong>显示在<code>bucket</code>页面中，而不是键本身。</p></div><div class="post-footer">
         <a href="/cmu15445-extendible_hash_index/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/database/">Database</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/cmu15445-buffer_pool/">Cmu15445 Buffer Pool</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-01-13">2025-01-13</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="buffer-pool">Buffer Pool</h1>
-<p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p></div><div class="post-footer">
-        <a href="/cmu15445-buffer_pool/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/database/">Database</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/cmu15445-trie/">Cmu15445 Trie</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-01-13">2025-01-13</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="trie">Trie</h1>
-<p>trie 实现的是键值存储，字符串键可以映射到任何类型值。键的值存储在改键的最后一个字符的终端节点。例如将（“ab”， 1） 和 （“ac”， “val”） 插入到 trie 中。
-<img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="./pics/trie-01.svg"
-        data-srcset="./pics/trie-01.svg, ./pics/trie-01.svg 1.5x, ./pics/trie-01.svg 2x"
-        data-sizes="auto"
-        alt="./pics/trie-01.svg"
-        title="trie01" /></p></div><div class="post-footer">
-        <a href="/cmu15445-trie/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/database/">Database</a></div></div>
-</article></div></div>
+</article><ul class="pagination"><li class="page-item active">
+                    <span class="page-link">
+                        <a href="/">1</a>
+                    </span>
+                </li><li class="page-item ">
+                    <span class="page-link">
+                        <a href="/page/2/">2</a>
+                    </span>
+                </li></ul></div></div>
             </main><footer class="footer">
         <div class="footer-container"><div class="footer-line">完美的生活～</div><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.140.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
                 </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>

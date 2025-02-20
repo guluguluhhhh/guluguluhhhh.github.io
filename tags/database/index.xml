@@ -3,7 +3,20 @@
         <title>Database - Tag - 华子的博客</title>
         <link>https://guluguluhhhh.github.io/tags/database/</link>
         <description>Database - Tag - 华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 15 Jan 2025 10:45:30 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/tags/database/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 16 Jan 2025 13:35:16 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/tags/database/" rel="self" type="application/rss+xml" /><item>
+    <title>Cmu15445 Concurrency Control</title>
+    <link>https://guluguluhhhh.github.io/cmu15445_concurrency_control/</link>
+    <pubDate>Thu, 16 Jan 2025 13:35:16 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>https://guluguluhhhh.github.io/cmu15445_concurrency_control/</guid>
+    <description><![CDATA[<h1 id="concurrency-control">Concurrency Control</h1>
+<p>在这个项目中，你将通过实现乐观多版本并发控制（MVOCC）来为BusTub添加事务支持。</p>
+<h2 id="timestamps">Timestamps</h2>
+<h3 id="timestamp-allocation">Timestamp Allocation</h3>
+<blockquote>
+<p>当一个事务开始时，它将被分配一个<strong>读时间戳</strong>，这是最近提交的事务的提交时间戳。在事务提交时，它将被分配一个单调递增的<strong>提交时间戳</strong>。<strong>读时间戳确定事务可以读取哪些数据，而提交时间戳确定事务的序列化顺序。</strong></p>]]></description>
+</item>
+<item>
     <title>Cmu15445 Query Execution</title>
     <link>https://guluguluhhhh.github.io/cmu15445-query_execution/</link>
     <pubDate>Wed, 15 Jan 2025 10:45:30 &#43;0800</pubDate>
