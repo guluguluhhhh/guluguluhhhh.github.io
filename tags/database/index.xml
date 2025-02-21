@@ -3,10 +3,10 @@
         <title>Database - Tag - 华子的博客</title>
         <link>https://guluguluhhhh.github.io/tags/database/</link>
         <description>Database - Tag - 华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 16 Jan 2025 13:35:16 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/tags/database/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 02 Jan 2025 13:35:16 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/tags/database/" rel="self" type="application/rss+xml" /><item>
     <title>Cmu15445 Concurrency Control</title>
     <link>https://guluguluhhhh.github.io/cmu15445_concurrency_control/</link>
-    <pubDate>Thu, 16 Jan 2025 13:35:16 &#43;0800</pubDate>
+    <pubDate>Thu, 02 Jan 2025 13:35:16 &#43;0800</pubDate>
     <author>huazi</author>
     <guid>https://guluguluhhhh.github.io/cmu15445_concurrency_control/</guid>
     <description><![CDATA[<h1 id="concurrency-control">Concurrency Control</h1>
@@ -19,7 +19,7 @@
 <item>
     <title>Cmu15445 Query Execution</title>
     <link>https://guluguluhhhh.github.io/cmu15445-query_execution/</link>
-    <pubDate>Wed, 15 Jan 2025 10:45:30 &#43;0800</pubDate>
+    <pubDate>Fri, 20 Dec 2024 10:45:30 &#43;0800</pubDate>
     <author>huazi</author>
     <guid>https://guluguluhhhh.github.io/cmu15445-query_execution/</guid>
     <description><![CDATA[<h1 id="query-execution">Query Execution</h1>
@@ -28,9 +28,18 @@
 </p>]]></description>
 </item>
 <item>
+    <title>Cmu15445 Buffer Pool</title>
+    <link>https://guluguluhhhh.github.io/cmu15445-buffer_pool/</link>
+    <pubDate>Mon, 09 Dec 2024 16:49:33 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>https://guluguluhhhh.github.io/cmu15445-buffer_pool/</guid>
+    <description><![CDATA[<h1 id="buffer-pool">Buffer Pool</h1>
+<p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p>]]></description>
+</item>
+<item>
     <title>Cmu15445 Extendible Hash Index</title>
     <link>https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/</link>
-    <pubDate>Tue, 14 Jan 2025 12:41:00 &#43;0800</pubDate>
+    <pubDate>Sun, 01 Dec 2024 12:41:00 &#43;0800</pubDate>
     <author>huazi</author>
     <guid>https://guluguluhhhh.github.io/cmu15445-extendible_hash_index/</guid>
     <description><![CDATA[<h1 id="extendible-hash-index">Extendible Hash Index</h1>
@@ -38,18 +47,9 @@
 <p>下图显示了一个可扩展哈希表，其中<code>header</code>页最大深度为 2，<code>directory</code>页最大深度为 2，存储<code>bucket</code>页最多包含两个条目。值被省略，并且<strong>键的哈希值</strong>显示在<code>bucket</code>页面中，而不是键本身。</p>]]></description>
 </item>
 <item>
-    <title>Cmu15445 Buffer Pool</title>
-    <link>https://guluguluhhhh.github.io/cmu15445-buffer_pool/</link>
-    <pubDate>Mon, 13 Jan 2025 16:49:33 &#43;0800</pubDate>
-    <author>huazi</author>
-    <guid>https://guluguluhhhh.github.io/cmu15445-buffer_pool/</guid>
-    <description><![CDATA[<h1 id="buffer-pool">Buffer Pool</h1>
-<p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p>]]></description>
-</item>
-<item>
     <title>Cmu15445 Trie</title>
     <link>https://guluguluhhhh.github.io/cmu15445-trie/</link>
-    <pubDate>Mon, 13 Jan 2025 09:55:13 &#43;0800</pubDate>
+    <pubDate>Sun, 17 Nov 2024 09:55:13 &#43;0800</pubDate>
     <author>huazi</author>
     <guid>https://guluguluhhhh.github.io/cmu15445-trie/</guid>
     <description><![CDATA[<h1 id="trie">Trie</h1>

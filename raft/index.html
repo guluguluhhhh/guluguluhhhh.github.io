@@ -33,7 +33,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/guluguluhhhh.github.io\/raft\/"
-        },"genre": "posts","keywords": "Distributed Systems, Consensus Algorithm","wordcount":  7642 ,
+        },"genre": "posts","keywords": "Distributed Systems, Consensus Algorithm","wordcount":  7644 ,
         "url": "https:\/\/guluguluhhhh.github.io\/raft\/","datePublished": "2025-02-20T14:24:11+08:00","dateModified": "2025-02-20T14:24:11+08:00","publisher": {
             "@type": "Organization",
             "name": ""},"author": {
@@ -79,7 +79,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Raft论文阅读记录</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-category">included in <a href="/categories/paper/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>Paper</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-02-20">2025-02-20</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;7642 words&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-02-20">2025-02-20</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;7644 words&nbsp;
                 <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;16 minutes&nbsp;</div>
         </div><div class="details toc" id="toc-static"  data-kept="">
                 <div class="details-summary toc-title">
@@ -109,8 +109,8 @@
       </ul>
     </li>
     <li><a href="#6-集群成员更换">6 集群成员更换</a></li>
-    <li><a href="#日志压缩">日志压缩</a></li>
-    <li><a href="#客户端交互">客户端交互</a></li>
+    <li><a href="#7-日志压缩">7 日志压缩</a></li>
+    <li><a href="#8-客户端交互">8 客户端交互</a></li>
   </ul>
 </nav></div>
             </div><div class="content" id="content"><h1 id="摘要">摘要</h1>
@@ -299,7 +299,7 @@
 <li><strong>集群当前的领导者可能不在新的配置中</strong>。在这种情况下，一旦领导者提交了Cnew日志条目，它就会退位（返回到跟随者状态）。这意味着在提交 Cnew 的过程中，领导者将管理一个不包含自身的集群：<strong>它会继续复制日志条目，但不会将自己计入多数派中</strong>。领导者的切换发生在Cnew被提交时，因为这是新配置能够独立运行的第一个时刻（此时总是可以从Cnew中选出一个领导者）。在此之前，可能只有Cold中的服务器能够被选为领导者。</li>
 <li><strong>被移除的服务器（即不在Cnew中的服务器）可能会干扰集群的正常运行</strong>。这些服务器将不会接收到心跳消息，因此它们会因超时而启动新的选举。随后，它们会发送带有新任期号的 RequestVote RPC，这将导致当前领导者退回到跟随者状态。最终虽然会选出一个新的领导者，但被移除的服务器会再次超时，这一过程会不断重复。<strong>为了解决这个问题，服务器在认为当前领导者存在时会忽略 RequestVote RPC 请求</strong>。具体来说，如果服务器在从当前领导者接收到消息后的<strong>最小选举超时时间</strong>内收到了 RequestVote RPC，它不会更新自己的任期号或投出选票</li>
 </ol>
-<h2 id="日志压缩">日志压缩</h2>
+<h2 id="7-日志压缩">7 日志压缩</h2>
 <p>在正常运行期间，Raft的日志会不断增长以纳入更多的客户端请求。但实际中需要某些机制来丢弃过时信息。快照技术是最简单的日志压缩方法。将整个当前系统的状态写入到稳定存储介质的快照中，然后日志中到该点的内容全都被删除。</p>
 <p>图12展示了Raft快照的基本思想。每个服务器独立的进行快照，只涵盖日志中已提交的条目。大部分工作是状态机把当前状态写入快照。</p>
 <p><img
@@ -322,7 +322,7 @@
 <p>写入快照可能需要很长时间，而我们不希望这会延迟正常操作。解决方案时写时复制技术，以便新的更新可以被接受且不影响正在写入的快照。例如，使用函数式数据结构构建的状态机天然支持这一特性。或者，也可以利用操作系统提供的写时复制支持（例如，Linux上的fork），来创建整个状态机的内存快照。</p>
 </li>
 </ul>
-<h2 id="客户端交互">客户端交互</h2>
+<h2 id="8-客户端交互">8 客户端交互</h2>
 <p>这一节讲的是客户如何与Raft交互，包括客户如何找到集群领导者，以及Raft如何支持线性化语义。</p>
 <p>客户只给领导者发送请求，一开始客户先随机选一个服务器，如果不是领导者，这个服务器就会拒绝请求然后提供最近的领导者信息。如果领导者崩溃，客户请求会超时，再次尝试还是随机的服务器。</p>
 <p>我们的目标是让Raft实现<strong>线性化语义</strong>。然而，Raft可能会多次执行一个命令，比如领导者在提交条目之后返回给客户之前崩溃，客户就会重新尝试命令给一个新领导者，导致命令重复执行。<strong>解决办法是给每个命令分配一个唯一线性数字</strong>，然后状态机追踪给每个客户最新处理的命令数字，带上相关联的回应。如果它收到已经被执行的命令数字，就立刻回应但不执行。</p>

@@ -86,7 +86,7 @@
                 <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/distributed-systems/">Distributed Systems</a></div></div>
 </article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/cmu15445_concurrency_control/">Cmu15445 Concurrency Control</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-01-16">2025-01-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="concurrency-control">Concurrency Control</h1>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-01-02">2025-01-02</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="concurrency-control">Concurrency Control</h1>
 <p>在这个项目中，你将通过实现乐观多版本并发控制（MVOCC）来为BusTub添加事务支持。</p>
 <h2 id="timestamps">Timestamps</h2>
 <h3 id="timestamp-allocation">Timestamp Allocation</h3>
@@ -96,7 +96,7 @@
                 <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/database/">Database</a></div></div>
 </article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/cmu15445-query_execution/">Cmu15445 Query Execution</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-01-15">2025-01-15</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="query-execution">Query Execution</h1>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2024-12-20">2024-12-20</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="query-execution">Query Execution</h1>
 <p>在这次项目中，将实现允许 BusTub 执行查询的组件。具体是创建执行 SQL 查询的运算符执行程序，并实施优化器规则来转换查询计划。</p>
 <p>BusTub的架构如下：
 <img
@@ -110,11 +110,10 @@
         <a href="/cmu15445-query_execution/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/database/">Database</a></div></div>
 </article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/cmu15445-extendible_hash_index/">Cmu15445 Extendible Hash Index</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-01-14">2025-01-14</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="extendible-hash-index">Extendible Hash Index</h1>
-<p>在此编程项目中，将使用<strong>可扩展哈希</strong>的变体作为哈希方案，在数据库系统中实现磁盘支持的哈希索引。</p>
-<p>下图显示了一个可扩展哈希表，其中<code>header</code>页最大深度为 2，<code>directory</code>页最大深度为 2，存储<code>bucket</code>页最多包含两个条目。值被省略，并且<strong>键的哈希值</strong>显示在<code>bucket</code>页面中，而不是键本身。</p></div><div class="post-footer">
-        <a href="/cmu15445-extendible_hash_index/">Read More</a><div class="post-tags">
+        <a href="/cmu15445-buffer_pool/">Cmu15445 Buffer Pool</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-publish">published on <time datetime="2024-12-09">2024-12-09</time></span>&nbsp;<span class="post-category">included in <a href="/categories/cmu/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>CMU</a></span></div><div class="content"><h1 id="buffer-pool">Buffer Pool</h1>
+<p>这个project是要在存储管理器中实现一个buffer pool，即<strong>缓冲池</strong>。缓冲池其实就是一块大的内存区域<strong>主内存</strong>，负责与<strong>磁盘</strong>之间来回移动物理页。它使得DBMS支持大于系统可用内存的数据库。缓冲池的操作对系统中的其他部分应该是透明的。例如，系统使用唯一标识符<code>page_id_t</code>想缓冲池请求页面的时候，系统不知道该页面是否位于已经在内存中，或者是需要从磁盘检索。</p></div><div class="post-footer">
+        <a href="/cmu15445-buffer_pool/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/database/">Database</a></div></div>
 </article><ul class="pagination"><li class="page-item active">
                     <span class="page-link">
