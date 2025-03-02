@@ -3,7 +3,18 @@
         <title>MIT6.5840 - Category - 华子的博客</title>
         <link>https://guluguluhhhh.github.io/categories/mit6.5840/</link>
         <description>MIT6.5840 - Category - 华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 18 Feb 2025 16:00:38 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/categories/mit6.5840/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 02 Mar 2025 18:49:48 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/categories/mit6.5840/" rel="self" type="application/rss+xml" /><item>
+    <title>Mit6.5840 Raft</title>
+    <link>https://guluguluhhhh.github.io/mit6.5840-raft/</link>
+    <pubDate>Sun, 02 Mar 2025 18:49:48 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>https://guluguluhhhh.github.io/mit6.5840-raft/</guid>
+    <description><![CDATA[<h2 id="3a-领导人选举">3A 领导人选举</h2>
+<p>3A主要实现的是领导者选举和心跳（没有日志条目的<code>AppendEntries</code>RPC）。</p>
+<p>基本上根据论文的图2来定义结构体。Raft结构体加上electionTimeOut bool来标记某个服务器是否超时，超时未收到心跳需要发起新一轮选举。
+</p>]]></description>
+</item>
+<item>
     <title>Mit6.5840 KVServer</title>
     <link>https://guluguluhhhh.github.io/mit6.5840-kvserver/</link>
     <pubDate>Tue, 18 Feb 2025 16:00:38 &#43;0800</pubDate>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Mit6.5840 Raft - 华子的博客</title><meta name="Description" content=""><meta property="og:url" content="https://guluguluhhhh.github.io/mit6.5840-raft/">
+  <meta property="og:site_name" content="华子的博客">
+  <meta property="og:title" content="Mit6.5840 Raft">
+  <meta property="og:description" content="3A 领导人选举 3A主要实现的是领导者选举和心跳（没有日志条目的AppendEntriesRPC）。
+基本上根据论文的图2来定义结构体。Raft结构体加上electionTimeOut bool来标记某个服务器是否超时，超时未收到心跳需要发起新一轮选举。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-03-02T18:49:48+08:00">
+    <meta property="article:modified_time" content="2025-03-02T18:49:48+08:00">
+    <meta property="article:tag" content="Distributed Systems">
+    <meta property="article:tag" content="Consensus Algorithm">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Mit6.5840 Raft">
+  <meta name="twitter:description" content="3A 领导人选举 3A主要实现的是领导者选举和心跳（没有日志条目的AppendEntriesRPC）。
+基本上根据论文的图2来定义结构体。Raft结构体加上electionTimeOut bool来标记某个服务器是否超时，超时未收到心跳需要发起新一轮选举。">
+<meta name="application-name" content="My cool site">
+<meta name="apple-mobile-web-app-title" content="My cool site"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://guluguluhhhh.github.io/mit6.5840-raft/" /><link rel="prev" href="https://guluguluhhhh.github.io/raft/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Mit6.5840 Raft",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/guluguluhhhh.github.io\/mit6.5840-raft\/"
+        },"genre": "posts","keywords": "Distributed Systems, Consensus Algorithm","wordcount":  1897 ,
+        "url": "https:\/\/guluguluhhhh.github.io\/mit6.5840-raft\/","datePublished": "2025-03-02T18:49:48+08:00","dateModified": "2025-03-02T18:49:48+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "huazi"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="华子的博客">华子的博客</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+             
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="华子的博客">华子的博客</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a>
+ 
+        </div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Mit6.5840 Raft</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span>&nbsp;<span class="post-category">included in <a href="/categories/mit6.5840/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>MIT6.5840</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-03-02">2025-03-02</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;1897 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;4 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#3a-领导人选举">3A 领导人选举</a>
+      <ul>
+        <li><a href="#requestvote-rpc">RequestVote RPC</a></li>
+        <li><a href="#appendentries-rpc">AppendEntries RPC</a></li>
+        <li><a href="#make">make</a></li>
+        <li><a href="#broadcastheartbeat">BroadcastHeartBeat</a></li>
+        <li><a href="#startelection">startElection</a></li>
+      </ul>
+    </li>
+    <li><a href="#3b-日志复制">3B 日志复制</a>
+      <ul>
+        <li><a href="#reequestvote-rpc">ReequestVote RPC</a></li>
+        <li><a href="#appendentries-rpc-1">AppendEntries RPC</a></li>
+        <li><a href="#start">Start</a></li>
+        <li><a href="#broadcastheartbeat-1">BroadcastHeartBeat</a></li>
+        <li><a href="#startelection-1">startElection</a></li>
+      </ul>
+    </li>
+    <li><a href="#3c-持久性">3C 持久性</a>
+      <ul>
+        <li><a href="#persist">persist()</a></li>
+        <li><a href="#readpersist">readPersist()</a></li>
+        <li><a href="#优化">优化</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="3a-领导人选举">3A 领导人选举</h2>
+<p>3A主要实现的是领导者选举和心跳（没有日志条目的<code>AppendEntries</code>RPC）。</p>
+<p>基本上根据论文的图2来定义结构体。Raft结构体加上electionTimeOut bool来标记某个服务器是否超时，超时未收到心跳需要发起新一轮选举。
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="./pics/2.png"
+        data-srcset="./pics/2.png, ./pics/2.png 1.5x, ./pics/2.png 2x"
+        data-sizes="auto"
+        alt="./pics/2.png"
+        title="./pics/2.png" /></p>
+<h3 id="requestvote-rpc">RequestVote RPC</h3>
+<ol>
+<li>上锁</li>
+<li>如果<code>args.Term</code>小于自己的<code>currentTerm</code>，说明选举人的日志不是最新的，则拒绝。</li>
+<li>如果<code>args.Term</code>等于自己的<code>currentTerm</code>且自己的<code>votedFor</code>已经投给了别人，也拒绝。</li>
+<li>先判断<code>args.Term</code>大于自己的<code>currentTerm</code>，如果是就更新<code>currentTerm</code>，重置<code>votedFor</code>和<code>state</code>。</li>
+<li>重置<code>electionTimeOut</code>为<code>false</code>，然后投票给<code>args.CandidateId</code>，并返回true。</li>
+</ol>
+<h3 id="appendentries-rpc">AppendEntries RPC</h3>
+<p>目前只需实现AppendEntries的一小部分</p>
+<ol>
+<li>上锁</li>
+<li>如果<code>args.Term</code>小于自己的<code>currentTerm</code>，说明选举人的日志不是最新的，则拒绝。</li>
+<li>如果<code>args.Term</code>大于自己的<code>currentTerm</code>，更新<code>currentTerm</code>，重置<code>votedFor</code>。</li>
+<li>成功，设置<code>state</code>为跟随者，重置<code>electionTimeOut</code>为<code>false</code>。</li>
+</ol>
+<h3 id="make">make</h3>
+<p>这个函数中，除了初始化server的各个参数之外，开启两个goroutine，循环执行，一个给leader执行心跳，另一个判断如果超时了就重新开一轮选举。</p>
+<h3 id="broadcastheartbeat">BroadcastHeartBeat</h3>
+<ol>
+<li>领导给所有peer发送心跳，循环时判断如果是自己就跳过。</li>
+<li>启动一个goroutine，并发执行心跳的发送。</li>
+<li>初始化<code>args</code>和<code>reply</code>，然后调用<code>sendAppendEntries</code>，发送日志为空的心跳。</li>
+<li>此时先检查自己是否还是领导者，然后看如果回应是失败，检查reply.Term如果大于自己的<code>currentTerm</code>，说明自己过时了，直接转换为跟随者，更新<code>currentTerm</code>，重置<code>votedFor</code>和<code>electionTimeOut</code>，并返回。</li>
+</ol>
+<h3 id="startelection">startElection</h3>
+<ol>
+<li>构建<code>args</code>和<code>reply</code>，然后调用<code>sendRequestVote</code>，启动goroutine发送请求投票的RPC。</li>
+<li>检查自己是否还是候选者，之后如果<code>reply.VoteGranted</code>为true，计数加一，检查是否超过半数，过半了就转换为领导者，并返回。</li>
+<li>如果<code>reply.VoteGranted为false</code>，检查<code>reply.Term</code>是否大于自己的<code>currentTerm</code>，如果是，说明自己不是最新的了，转换为跟随者，重置参数。</li>
+</ol>
+<h2 id="3b-日志复制">3B 日志复制</h2>
+<p>3B主要实现的是日志复制，即领导者将日志复制给跟随者。</p>
+<h3 id="reequestvote-rpc">ReequestVote RPC</h3>
+<p>这里在进行投票时，需要加上判断候选者的日志是否是最新的。</p>
+<h3 id="appendentries-rpc-1">AppendEntries RPC</h3>
+<ol>
+<li>在上一次的基础上，检查在log中<code>args.PrevLogIndex</code>位置的日志是否匹配任期。</li>
+<li>删除<code>prevLogIndex</code>之后的日志条目，不是心跳则追加新日志条目。</li>
+<li>更新<code>commitIndex</code>，然后把日志应用到状态机，即加入到applyCh</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">rf</span><span class="p">.</span><span class="nx">lastApplied</span> <span class="p">&lt;</span> <span class="nx">rf</span><span class="p">.</span><span class="nx">commitIndex</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">i</span> <span class="o">:=</span> <span class="nx">rf</span><span class="p">.</span><span class="nx">lastApplied</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">rf</span><span class="p">.</span><span class="nx">applyCh</span> <span class="o">&lt;-</span> <span class="nx">ApplyMsg</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">CommandValid</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">Command</span><span class="p">:</span>      <span class="nx">rf</span><span class="p">.</span><span class="nx">log</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Command</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">CommandIndex</span><span class="p">:</span> <span class="nx">i</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">rf</span><span class="p">.</span><span class="nx">lastApplied</span> <span class="p">=</span> <span class="nx">i</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="start">Start</h3>
+<p>这个函数就是把用户的指令装成日志条目，append到领导者的日志中。</p>
+<h3 id="broadcastheartbeat-1">BroadcastHeartBeat</h3>
+<ol>
+<li>遍历发送的时候，判断如果该<code>peer</code>日志不是最新的就加上entries让他添加，否则就发送空entries表示心跳。</li>
+<li>成功的话，需要维护<code>matchIndex</code>和<code>nextIndex</code>。</li>
+<li>失败的话，需要加上判断，若不是因为自己不够新导致的，那就是<code>nextIndex</code>不匹配，需要减1。</li>
+<li>然后对当前任期的每个日志条目，统计每个跟随者的<code>matchIndex</code>大于等于该条目index的数量，如果大于半数，则更新<code>commitIndex</code>，并应用到状态机。</li>
+</ol>
+<h3 id="startelection-1">startElection</h3>
+<p>选中领导者的时候，初始化所有nextIndex为当前日志长度，所有matchIndex为-1。</p>
+<h2 id="3c-持久性">3C 持久性</h2>
+<p>这里主要是实现<code>persist()</code>和<code>readPersist()</code>两个函数，然后在raft.go中服务器的当前任期、日志、投票人发生变动时调用，以持久化存储状态。</p>
+<h3 id="persist">persist()</h3>
+<p>使用labgob创建编码器，将当前服务器的当前任期、日志、投票人信息编码进去，按照注释中的流程将状态编码序列话，然后用<code>persister</code>存储。</p>
+<h3 id="readpersist">readPersist()</h3>
+<p>用labgob创建一个解码器，解码状态，并赋值给当前服务器的当前任期、日志、投票人。</p>
+<h3 id="优化">优化</h3>
+<p>可以优化该协议以减少被拒绝的<code>AppendEntries</code>RPC的数量。例如，当一个跟随者拒绝一个 <code>AppendEntries</code> 请求时，它可以包含冲突条目所属的任期以及该任期中它存储的第一个索引。通过这些信息，领导者可以将 nextIndex减小，从而跳过该任期内所有冲突的条目。这样，每个包含冲突条目的任期只需要一次<code>AppendEntries</code>RPC，而不是每个条目都需要一次RPC。</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-03-02</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/mit6.5840-raft/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://guluguluhhhh.github.io/mit6.5840-raft/" data-title="Mit6.5840 Raft" data-hashtags="Distributed Systems,Consensus Algorithm"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://guluguluhhhh.github.io/mit6.5840-raft/" data-hashtag="Distributed Systems"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://guluguluhhhh.github.io/mit6.5840-raft/" data-title="Mit6.5840 Raft"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="https://guluguluhhhh.github.io/mit6.5840-raft/" data-title="Mit6.5840 Raft"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="https://guluguluhhhh.github.io/mit6.5840-raft/" data-title="Mit6.5840 Raft"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/distributed-systems/">Distributed Systems</a>,&nbsp;<a href="/tags/consensus-algorithm/">Consensus Algorithm</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/raft/" class="prev" rel="prev" title="Raft论文阅读记录"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Raft论文阅读记录</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">完美的生活～</div><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.140.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":50},"comment":{}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
