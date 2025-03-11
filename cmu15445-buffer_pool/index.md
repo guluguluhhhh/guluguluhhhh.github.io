@@ -36,7 +36,7 @@ LRU-K 算法移出其**后向 k 距离**为replacer中所有帧的最大值的�
 1. 当前时间戳加1，先在`node_store_`找frame_id，找到了就直接把当前时间戳添加到该帧的访问历史中，否则新建一个节点，添加访问历史，并把新节点emplace到`node_store_`中。
 
 ### **`Remove(frame_id_t frame_id)`**
-> 清除与框架关联的所有访问历史记录。仅当在 `BufferPoolManager` 中删除页面时，才应调用此方法。
+> 清除与该帧关联的所有访问历史记录。仅当在 `BufferPoolManager` 中删除页面时，才应调用此方法。
 
 1. 获取latch，frame_id不超过`replacer_size_`，否则throw exception。
 1. 在`node_store_`找该帧，若没找到或者找到了但不可驱逐，直接return。

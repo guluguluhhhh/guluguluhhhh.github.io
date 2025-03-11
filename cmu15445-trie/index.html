@@ -134,7 +134,7 @@
 <h2 id="copy-on-write">copy-on-write</h2>
 <p>写时复制，任何操作都不会修改原先的trie节点，而是会为修改后的数据创建新节点，并为修改后的trie返回新的根节点。这样做可以很方便的访问旧的trie，撤销操作也容易。</p>
 <h3 id="插入">插入</h3>
-<p>例如对之前的trie插入（“ab”， 2），这里会复用原先树中的两个字节点，并创建一个新的<em><strong>值节点2</strong></em>，然后用他们三个来创建新的<em><strong>Node2</strong></em>。
+<p>例如对之前的trie插入（“ad”， 2），这里会复用原先树中的两个字节点，并创建一个新的<em><strong>值节点2</strong></em>，然后用他们三个来创建新的<em><strong>Node2</strong></em>。
 <img
         class="lazyload"
         src="/svg/loading.min.svg"

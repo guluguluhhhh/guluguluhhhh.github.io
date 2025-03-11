@@ -166,7 +166,7 @@
 </ol>
 <h3 id="removeframe_id_t-frame_id"><strong><code>Remove(frame_id_t frame_id)</code></strong></h3>
 <blockquote>
-<p>清除与框架关联的所有访问历史记录。仅当在 <code>BufferPoolManager</code> 中删除页面时，才应调用此方法。</p>
+<p>清除与该帧关联的所有访问历史记录。仅当在 <code>BufferPoolManager</code> 中删除页面时，才应调用此方法。</p>
 </blockquote>
 <ol>
 <li>获取latch，frame_id不超过<code>replacer_size_</code>，否则throw exception。</li>

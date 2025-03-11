@@ -1,6 +1,7 @@
 # Mit6.5840 Raft
 
 
+
 ## 3A 领导人选举
 3A主要实现的是领导者选举和心跳（没有日志条目的`AppendEntries`RPC）。
 
