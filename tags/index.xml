@@ -3,28 +3,28 @@
         <title>Tags - Tag - 华子的博客</title>
         <link>https://guluguluhhhh.github.io/tags/</link>
         <description>Tags - Tag - 华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 02 Mar 2025 18:49:48 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/tags/" rel="self" type="application/rss+xml" /><item>
-    <title>Consensus Algorithm</title>
-    <link>https://guluguluhhhh.github.io/tags/consensus-algorithm/</link>
-    <pubDate>Sun, 02 Mar 2025 18:49:48 &#43;0800</pubDate>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 14 Jun 2025 17:51:06 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/tags/" rel="self" type="application/rss+xml" /><item>
+    <title>Database</title>
+    <link>https://guluguluhhhh.github.io/tags/database/</link>
+    <pubDate>Sat, 14 Jun 2025 17:51:06 &#43;0800</pubDate>
     <author>Author</author>
-    <guid>https://guluguluhhhh.github.io/tags/consensus-algorithm/</guid>
+    <guid>https://guluguluhhhh.github.io/tags/database/</guid>
     <description><![CDATA[]]></description>
 </item>
 <item>
     <title>Distributed Systems</title>
     <link>https://guluguluhhhh.github.io/tags/distributed-systems/</link>
-    <pubDate>Sun, 02 Mar 2025 18:49:48 &#43;0800</pubDate>
+    <pubDate>Sat, 14 Jun 2025 17:51:06 &#43;0800</pubDate>
     <author>Author</author>
     <guid>https://guluguluhhhh.github.io/tags/distributed-systems/</guid>
     <description><![CDATA[]]></description>
 </item>
 <item>
-    <title>Database</title>
-    <link>https://guluguluhhhh.github.io/tags/database/</link>
-    <pubDate>Thu, 02 Jan 2025 13:35:16 &#43;0800</pubDate>
+    <title>Consensus Algorithm</title>
+    <link>https://guluguluhhhh.github.io/tags/consensus-algorithm/</link>
+    <pubDate>Sun, 02 Mar 2025 18:49:48 &#43;0800</pubDate>
     <author>Author</author>
-    <guid>https://guluguluhhhh.github.io/tags/database/</guid>
+    <guid>https://guluguluhhhh.github.io/tags/consensus-algorithm/</guid>
     <description><![CDATA[]]></description>
 </item>
 </channel>

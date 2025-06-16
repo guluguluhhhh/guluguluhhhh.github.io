@@ -3,7 +3,16 @@
         <title>Paper - Category - 华子的博客</title>
         <link>https://guluguluhhhh.github.io/categories/paper/</link>
         <description>Paper - Category - 华子的博客</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 20 Feb 2025 14:24:11 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/categories/paper/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 14 Jun 2025 17:51:06 &#43;0800</lastBuildDate><atom:link href="https://guluguluhhhh.github.io/categories/paper/" rel="self" type="application/rss+xml" /><item>
+    <title>PolarDB MP</title>
+    <link>https://guluguluhhhh.github.io/polardb-mp/</link>
+    <pubDate>Sat, 14 Jun 2025 17:51:06 &#43;0800</pubDate>
+    <author>huazi</author>
+    <guid>https://guluguluhhhh.github.io/polardb-mp/</guid>
+    <description><![CDATA[<h1 id="摘要">摘要</h1>
+<p>传统的主从架构（<strong>Primary- secondary</strong>）数据库的写入能力有限，因为其使用单个主节点来写入，从节点只是同步数据。所以一些系统采用无共享架构（<strong>shared-nothing</strong>），实现了可扩展的多主节点集群，但带来了分布式事务的开销和性能损失。最近，出现基于共享存储（<strong>shared-stroage</strong>）的多主节点云原生数据库，存算分离，避免了分布式事务，但在高冲突场景下仍表现不佳，原因有冲突解决、数据融合等。</p>]]></description>
+</item>
+<item>
     <title>Raft论文阅读记录</title>
     <link>https://guluguluhhhh.github.io/raft/</link>
     <pubDate>Thu, 20 Feb 2025 14:24:11 &#43;0800</pubDate>
