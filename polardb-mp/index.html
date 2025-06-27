@@ -22,7 +22,7 @@
 <meta name="application-name" content="My cool site">
 <meta name="apple-mobile-web-app-title" content="My cool site"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://guluguluhhhh.github.io/polardb-mp/" /><link rel="prev" href="https://guluguluhhhh.github.io/mit6.5840-raft/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://guluguluhhhh.github.io/polardb-mp/" /><link rel="prev" href="https://guluguluhhhh.github.io/mit6.5840-raft/" /><link rel="next" href="https://guluguluhhhh.github.io/coroutine/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
         <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
         <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
     {
@@ -217,8 +217,8 @@
         data-srcset="./pics/3.jpg, ./pics/3.jpg 1.5x, ./pics/3.jpg 2x"
         data-sizes="auto"
         alt="./pics/3.jpg"
-        title="./pics/3.jpg" />
-当一个事务进行到提交阶段，会从TSO请求一个提交时间戳<strong>CTS</strong>，这个CTS是逻辑自增的，维护事务的顺序性。PolarDB-MP使用了一种去中心化的方法，把事务信息分散到所有节点。每个节点保留一小部份内存来存储本地<strong>事务信息表TIT</strong>，节点可以通过单边RDMA来获取其他节点的事务信息。</p>
+        title="./pics/3.jpg" /></p>
+<p>当一个事务进行到提交阶段，会从TSO请求一个提交时间戳<strong>CTS</strong>，这个CTS是逻辑自增的，维护事务的顺序性。PolarDB-MP使用了一种去中心化的方法，把事务信息分散到所有节点。每个节点保留一小部份内存来存储本地<strong>事务信息表TIT</strong>，节点可以通过单边RDMA来获取其他节点的事务信息。</p>
 <p>TIT在事务管理中发挥重要作用，它对每个事务维护了四个key：</p>
 <ul>
 <li>pointer：事务对象的指针</li>
@@ -240,8 +240,8 @@
         data-srcset="./pics/A1.jpg, ./pics/A1.jpg 1.5x, ./pics/A1.jpg 2x"
         data-sizes="auto"
         alt="./pics/A1.jpg"
-        title="./pics/A1.jpg" />
-<strong>判断可见性</strong>：</p>
+        title="./pics/A1.jpg" /></p>
+<p><strong>判断可见性</strong>：</p>
 <ol>
 <li>如果 row 上已经写了 CTS，那很好，直接判断是否小于读视图里的时间戳即可。</li>
 <li>否则，row 的 CTS 缺失，通过 g_trx_id 去 TIT 表里找。先查本地 TIT 表，如果没有就通过one-sided RDMA远程读该 node 的 TIT 表中的对应 slot。之后比较version 是否一致（否则可能误拿到别的事务的数据），如果 CTS 是有效时间戳 → 正常比较，如果不一致，说明原事务已经结束、row 肯定已经提交了，视为“谁都能看”。</li>
@@ -258,8 +258,8 @@
         data-srcset="./pics/4.jpg, ./pics/4.jpg 1.5x, ./pics/4.jpg 2x"
         data-sizes="auto"
         alt="./pics/4.jpg"
-        title="./pics/4.jpg" />
-Buffer Fusion是为了解决多节点共享读写数据页时的一致性问题。在多主架构（multi-primary）中，每个节点都可以修改任意一页，因此需要一个机制来：</p>
+        title="./pics/4.jpg" /></p>
+<p>Buffer Fusion是为了解决多节点共享读写数据页时的一致性问题。在多主架构（multi-primary）中，每个节点都可以修改任意一页，因此需要一个机制来：</p>
 <ul>
 <li>保证其它节点读到的是最新的页（可见性）；</li>
 <li>避免多个节点各自读写同一页产生写冲突、脏读或覆盖；</li>
@@ -300,8 +300,8 @@ Buffer Fusion是为了解决多节点共享读写数据页时的一致性问题�
         data-srcset="./pics/5.jpg, ./pics/5.jpg 1.5x, ./pics/5.jpg 2x"
         data-sizes="auto"
         alt="./pics/5.jpg"
-        title="./pics/5.jpg" />
-用PLock保持并发一致性，PLock是一种跨节点的页级互斥机制，确保不会有两个节点同时修改一个结构页。</p>
+        title="./pics/5.jpg" /></p>
+<p>用PLock保持并发一致性，PLock是一种跨节点的页级互斥机制，确保不会有两个节点同时修改一个结构页。</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -309,8 +309,8 @@ Buffer Fusion是为了解决多节点共享读写数据页时的一致性问题�
         data-srcset="./pics/6.jpg, ./pics/6.jpg 1.5x, ./pics/6.jpg 2x"
         data-sizes="auto"
         alt="./pics/6.jpg"
-        title="./pics/6.jpg" />
-RLock 是跨节点的全局行级排他锁，用于在多主节点场景中保障事务级一致性。仅支持 X-lock，通过写入行内字段和 Lock Fusion 的协助机制实现高效、低通信开销的 2PL。</p>
+        title="./pics/6.jpg" /></p>
+<p>RLock 是跨节点的全局行级排他锁，用于在多主节点场景中保障事务级一致性。仅支持 X-lock，通过写入行内字段和 Lock Fusion 的协助机制实现高效、低通信开销的 2PL。</p>
 <h2 id="44-日志顺序和恢复">4.4 日志顺序和恢复</h2>
 <p>PolarDB-MP 继承了传统数据库中的 ARIES 风格日志系统。有Redo Log（预写日志）保证持久化，恢复提交事务修改；Undo Log用来回滚未提交的事务。每个节点本地维护日志，每个节点都有独立的 redo/undo log 文件，节点可以并行将日志写入存储系统，不需额外同步或加锁。事务提交前，必须先将 redo log 持久化 → WAL（Write-Ahead Logging）原则。</p>
 <p>在 PolarDB-MP 的多主架构中，不同节点可以并发更新同一页，每个节点都会生成独立的 redo log。所以在恢复时，需要确保针对同一页的日志按写入顺序依次重放，而对不同页的日志，不需要统一排序，任意顺序都可。提出LLSN，不再强求全局日志排序（Global LSN），而是采用每页局部排序策略。</p>
@@ -362,7 +362,8 @@ RLock 是跨节点的全局行级排他锁，用于在多主节点场景中保�
         </section>
     </div>
 
-    <div class="post-nav"><a href="/mit6.5840-raft/" class="prev" rel="prev" title="Mit6.5840 Raft"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Mit6.5840 Raft</a></div>
+    <div class="post-nav"><a href="/mit6.5840-raft/" class="prev" rel="prev" title="Mit6.5840 Raft"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Mit6.5840 Raft</a>
+            <a href="/coroutine/" class="next" rel="next" title="coroutine">coroutine<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
 </div>
 </article></div>
             </main><footer class="footer">
