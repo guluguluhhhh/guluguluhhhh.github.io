@@ -36,7 +36,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/guluguluhhhh.github.io\/coroutine\/"
-        },"genre": "posts","keywords": "runtime, asynchronous, concurrency","wordcount":  2062 ,
+        },"genre": "posts","keywords": "runtime, asynchronous, concurrency","wordcount":  2789 ,
         "url": "https:\/\/guluguluhhhh.github.io\/coroutine\/","datePublished": "2025-06-27T16:38:22+08:00","dateModified": "2025-06-27T16:38:22+08:00","publisher": {
             "@type": "Organization",
             "name": ""},"author": {
@@ -82,8 +82,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">coroutine</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>huazi</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-06-27">2025-06-27</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;2062 words&nbsp;
-                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;5 minutes&nbsp;</div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-06-27">2025-06-27</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;2789 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;6 minutes&nbsp;</div>
         </div><div class="details toc" id="toc-static"  data-kept="">
                 <div class="details-summary toc-title">
                     <span>Contents</span>
@@ -174,12 +174,22 @@ time.Sleep(1 * time.Second)
 <li>goroutine启动时默认栈大小只有2k，这在多数情况下已经够用了，即使不够用，goroutine的栈也会自动扩大，同时，如果栈太大了过于浪费它还能自动收缩，这样既没有栈溢出的风险，也不会造成栈内存空间的大量浪费。</li>
 </ul>
 <h1 id="rust协程tokio">rust协程：tokio</h1>
-<p>通常，无栈协程在内存空间和协程上下文切换的效率更高。rust中的协程可以看作一个状态机结构体Future，一般放在堆上，并作为任务被推入一个异步任务队列等待调度器线程来调用。</p>
+<p>与 Go 等语言的有栈协程不同，Rust 的 async/await 实现的是无栈协程。这种设计在内存占用和任务切换开销上通常更具优势。</p>
+<p>在 Rust 中，一个 async 代码块或 async fn 函数在编译后会生成一个实现了 Future trait 的状态机结构体。这个 Future 本身可以存在于栈上。当我们调用 tokio::spawn 将其作为一个任务交给调度器时，Tokio 会将其**装箱（Box）**并放到堆上，以便在不同线程间安全地移动和管理。随后，这个被包装的任务被推入异步任务队列，等待调度器线程执行。</p>
 <h2 id="协程运行机制">协程运行机制</h2>
-<p>在rust中，<code>async fn</code>用来定义一个异步函数，被编译成状态机结构体Future，<code>tokio::spawn</code>会把Future推入到调度器的任务队列，实际线程从队列中取任务，调用<code>Future::poll</code>方法，返回<code>Poll::Ready</code>则任务完成，如果是<code>Poll::Pending</code>，就说明遇到了 .await 的阻塞点，注册 waker，挂起当前任务。</p>
-<p>阻塞事件完成后，比如网络收到了响应、文件读取完成、锁可用等，Waker唤醒任务。被唤醒的任务再次 poll()，直到最终完成。
-状态机的转换过程如下图：
-<img
+<p>在rust中，<code>async fn</code>用来定义一个异步函数，被编译成状态机结构体Future，<code>tokio::spawn</code>会把Future推入到调度器的任务队列，实际线程从队列中取任务，调用<code>Future::poll</code>方法，返回<code>Poll::Ready</code>则任务完成。如果 poll 方法返回 <code>Poll::Pending</code>，这表明任务在某个 .await 处遇到了一个尚未完成的异步操作，此时任务需要等待。这并非传统意义上的“线程阻塞”，而是一个<strong>挂起点</strong>。</p>
+<p>此时，任务会：</p>
+<ol>
+<li>
+<p>向执行器（Executor）注册一个 Waker。这个 Waker 知道如何唤醒当前任务。</p>
+</li>
+<li>
+<p>任务被挂起，执行它的工作线程则会立即丢下它，去处理本地队列中的下一个就绪任务，线程本身从不阻塞。</p>
+</li>
+</ol>
+<p>当等待的事件完成时（例如，网络数据到达），事件源会调用之前注册的 Waker 的 wake() 方法。被唤醒的任务会被重新放回调度器的就绪队列中，等待下一次被线程轮询。
+状态机的转换过程如下图：</p>
+<p><img
         class="lazyload"
         src="/svg/loading.min.svg"
         data-src="./pics/future.jpg"
@@ -191,12 +201,23 @@ time.Sleep(1 * time.Second)
 <p>Tokio采用多线程、work-stealing调度策略：</p>
 <ul>
 <li>每个线程都有一个本地任务队列；</li>
-<li>新任务随机分配到某个线程；</li>
-<li>空闲线程可以从其他线程“偷”任务；</li>
+<li>在 Tokio 工作线程内部调用 spawn 时，优先尝试将这个新任务放入当前工作线程自己的本地运行队列中，增强数据局部性。</li>
+<li>当本地任务队列已满时或者从 Tokio 运行时外部调用 spawn 时，会尝试将任务放入全局任务队列中；</li>
+<li>空闲线程可以从其他线程（包括全局队列）“偷”任务；</li>
 <li>每个任务的 Future 是 Send + &lsquo;static，所以可以在不同线程间移动执行。</li>
 </ul>
 <h2 id="适用场景">适用场景</h2>
-<p>I/O密集型</p>
+<ul>
+<li>I/O 密集型（I/O-Bound）</li>
+</ul>
+<p>**Tokio 的异步模型最核心的优势在于处理 I/O 密集型任务。**例如网络请求、数据库连接、文件读写等。</p>
+<p>原因在于：对于这类任务，程序大部分时间都在等待外部资源（如网络、磁盘）的响应。在传统的同步阻塞模型中，等待会使整个线程挂起，浪费 CPU 资源。而在 Tokio 中，当一个任务等待 I/O 时，它会主动让出（.await）CPU，使得执行线程可以去处理成百上千个其他并发任务。这种“在等待时做别的事”的模式极大地提高了单线程的利用率和整个系统的吞吐能力。</p>
+<ul>
+<li>CPU 密集型（CPU-Bound）</li>
+</ul>
+<p>对于需要长时间进行密集计算的任务，不应该直接在 Tokio 的主异步上下文中运行。</p>
+<p>原因在于：这样的任务会长时间占用线程的 CPU 时间，并且从不“让出”（因为没有 .await I/O 操作）。这会导致它所在的线程无法去轮询其他任务，造成<strong>调度器饥饿</strong>，使得该线程上的所有其他异步任务都得不到执行，严重影响响应性。</p>
+<p>对于这类计算密集型任务，可以派发到专门的阻塞线程池中去执行。</p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
